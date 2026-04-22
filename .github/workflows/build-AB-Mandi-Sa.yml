@@ -264,22 +264,28 @@ jobs:
     - name: 开始编译内核
       run: |
         cd $GITHUB_WORKSPACE/kernel_workspace
+        echo "🔍 正在搜索 ZS673KS_defconfig..."
+        FOUND_FILE=$(find . -name "ZS673KS_defconfig")
+
+        if [ -z "$FOUND_FILE" ]; then
+            echo "❌ 错误：找不到 ZS673KS_defconfig！请检查源码是否正确下载。"
+          exit 1
+        else
+          echo "✅ 找到文件：$FOUND_FILE"
+        fi
+
+        cp $FOUND_FILE arch/arm64/configs/
         export PATH=$GITHUB_WORKSPACE/kernel_workspace/clang-mandi-sa/bin:$PATH
         export KBUILD_BUILD_HOST=17
         export KBUILD_BUILD_USER=HyperPower
         
-        DEF_CONFIG=$(find . -name "${{ env.KERNEL_CONFIG }}" | head -1)
-
-        MAKE_TARGET=$(echo $DEF_CONFIG | sed "s|./arch/arm64/configs/||")
-        echo "使用编译目标: $MAKE_TARGET"
-
-        make -s -j$(nproc --all) O=out ARCH=arm64 $MAKE_TARGET
-    
+        make -s -j$(nproc --all) O=out ARCH=arm64 ${{ env.KERNEL_CONFIG }}
         if [ "${{env.LLVM_CONFIG}}" = "y" ]; then
           make -j$(nproc --all) CONFIG_DEBUG_SECTION_MISMATCH=y CC="ccache clang" CXX=clang++ O=out ARCH=arm64 CLANG_TRIPLE="aarch64-linux-gnu-" CROSS_COMPILE="aarch64-linux-gnu-" CROSS_COMPILE_ARM32="arm-linux-gnueabi-" LLVM=1 LLVM_IAS=1
         else
           make -j$(nproc --all) CONFIG_DEBUG_SECTION_MISMATCH=y CC="ccache clang" CXX=clang++ O=out ARCH=arm64 CLANG_TRIPLE="aarch64-linux-gnu-" CROSS_COMPILE="aarch64-linux-gnu-" CROSS_COMPILE_ARM32="arm-linux-gnueabi-"
         fi
+        
     - name: 准备打包内核
       run: |       
         cd $GITHUB_WORKSPACE/kernel_workspace
