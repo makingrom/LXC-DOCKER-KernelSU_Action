@@ -65,12 +65,12 @@ jobs:
     - name: 下载内核源码
       run: |
         cd $GITHUB_WORKSPACE/kernel_workspace
-        git clone ${{ env.KERNEL_SOURCE }} -b ${{ env.KERNEL_SOURCE_BRANCH }} android-kernel --depth=1
+        git clone ${{ env.KERNEL_SOURCE }} -b ${{ env.KERNEL_SOURCE_BRANCH }} android-kernel
                       
     - name: 开启lxc和docker配置
       if: env.ENABLE_LXC_DOCKER == 'true'
       run: |
-        cd $GITHUB_WORKSPACE/kernel_workspace
+        cd $GITHUB_WORKSPACE/kernel_workspace/android-kernel
         CONFIG_FILE=$(find . -name "${{ env.KERNEL_CONFIG }}" | head -1)
 
         echo "找到配置文件：$CONFIG_FILE"
@@ -207,7 +207,7 @@ jobs:
         echo ">>> 配置注入完成！"
     - name: 添加runc补丁
       run: |
-        cd $GITHUB_WORKSPACE/kernel_workspace
+        cd $GITHUB_WORKSPACE/kernel_workspace/android-kernel
 
         CGROUP_FILE=$(find . -path "*/kernel/cgroup.c" -o -path "*/kernel/cgroup/cgroup.c" | head -1)
 
@@ -222,7 +222,7 @@ jobs:
     
     - name: 修复clang18部分
       run: |
-        cd $GITHUB_WORKSPACE/kernel_workspace
+        cd $GITHUB_WORKSPACE/kernel_workspace/android-kernel
         CONFIG_FILE=$(find . -name "${{ env.KERNEL_CONFIG }}" | head -1)
         
         sed -i "s/CONFIG_CC_STACKPROTECTOR_STRONG=y/# CONFIG_CC_STACKPROTECTOR_STRONG is not set/g" "$CONFIG_FILE" 2>/dev/null
@@ -264,6 +264,7 @@ jobs:
     - name: 开始编译内核
       run: |
         cd $GITHUB_WORKSPACE/kernel_workspace/android-kernel
+        cp arch/arm64/configs/vendor/ZS673KS_defconfig arch/arm64/configs/
         echo "🔍 正在搜索 ZS673KS_defconfig..."
         FOUND_FILE=$(find . -name "ZS673KS_defconfig")
 
@@ -273,8 +274,7 @@ jobs:
         else
           echo "✅ 找到文件：$FOUND_FILE"
         fi
-
-        cp $FOUND_FILE arch/arm64/configs/
+        
         export PATH=$GITHUB_WORKSPACE/kernel_workspace/clang-mandi-sa/bin:$PATH
         export KBUILD_BUILD_HOST=17
         export KBUILD_BUILD_USER=HyperPower
