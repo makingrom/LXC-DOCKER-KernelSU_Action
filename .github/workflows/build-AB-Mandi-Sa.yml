@@ -263,7 +263,7 @@ jobs:
         fi
     - name: 开始编译内核
       run: |
-        cd $GITHUB_WORKSPACE/kernel_workspace
+        cd $GITHUB_WORKSPACE/kernel_workspace/android-kernel
         echo "🔍 正在搜索 ZS673KS_defconfig..."
         FOUND_FILE=$(find . -name "ZS673KS_defconfig")
 
