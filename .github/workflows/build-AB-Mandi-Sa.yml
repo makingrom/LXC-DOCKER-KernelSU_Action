@@ -208,22 +208,28 @@ jobs:
     - name: 添加runc补丁
       run: |
         cd $GITHUB_WORKSPACE/kernel_workspace
-        wget https://github.com/fate-think/LXC-DOCKER-KernelSU_Action/releases/download/1.0.0/runcpatch.sh
-        chmod a+x runcpatch.sh
-        if [ -f android-kernel/kernel/cgroup.c ]; then
-        ./runcpatch.sh android-kernel/kernel/cgroup.c               
+
+        CGROUP_FILE=$(find . -path "*/kernel/cgroup.c" -o -path "*/kernel/cgroup/cgroup.c" | head -1)
+
+        if [ -z "$CGROUP_FILE" ]; then
+          echo "⚠️ 找不到cgroup.c，跳过补丁"
+          exit 0
         fi
-        if [ -f android-kernel/kernel/cgroup/cgroup.c ]; then
-        ./runcpatch.sh android-kernel/kernel/cgroup/cgroup.c               
-        fi
+
+        echo "✅ 找到文件: $CGROUP_FILE"
+        sed -i 's/struct cred *get_task_cred(struct task_struct *p)/struct cred *get_task_cred(struct task_struct *p)\n{\n\treturn __task_cred(p);\n}\n\nstatic __always_inline struct cred *old_get_task_cred/g' "$CGROUP_FILE" 2>/dev/null
+        echo ">>> runc 补丁完成！"
     
     - name: 修复clang18部分
       run: |
-        cd $GITHUB_WORKSPACE/kernel_workspace/android-kernel
-        sed -i "s/CONFIG_CC_STACKPROTECTOR_STRONG=y/# CONFIG_CC_STACKPROTECTOR_STRONG is not set/g" arch/arm64/configs/${{ env.KERNEL_CONFIG }}
-        wget https://github.com/fate-think/LXC-DOCKER-KernelSU_Action/releases/download/v3.0.0-stable/clangfix3.sh
-        chmod u+x clangfix3.sh
-        ./clangfix3.sh        
+        cd $GITHUB_WORKSPACE/kernel_workspace
+        CONFIG_FILE=$(find . -name "${{ env.KERNEL_CONFIG }}" | head -1)
+        
+        sed -i "s/CONFIG_CC_STACKPROTECTOR_STRONG=y/# CONFIG_CC_STACKPROTECTOR_STRONG is not set/g" "$CONFIG_FILE" 2>/dev/null
+
+        echo ">>> Clang 18 修复中..."
+        find . -name "Makefile" -o -name "*.h" | xargs sed -i 's/__attribute__((optimize("no-stack-protector")))//g' 2>/dev/null
+        echo ">>> Clang 修复完成！"
 
     - name: 配置 ksu
       if: env.ENABLE_KERNELSU == 'true'
