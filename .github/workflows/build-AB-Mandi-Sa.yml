@@ -234,27 +234,33 @@ jobs:
     - name: 配置 ksu
       if: env.ENABLE_KERNELSU == 'true'
       run: |
-        cd $GITHUB_WORKSPACE/kernel_workspace/android-kernel
+        cd $GITHUB_WORKSPACE/kernel_workspace
         curl -LSs "https://raw.githubusercontent.com/tiann/KernelSU/main/kernel/setup.sh" | bash -s ${{ env.KERNELSU_TAG }}
 
     - name: 开启kvm
       if: env.ENABLE_KVM == 'true'
       run: |
          cd $GITHUB_WORKSPACE/kernel_workspace
-         echo "CONFIG_VIRTUALIZATION=y" >> android-kernel/arch/arm64/configs/${{ env.KERNEL_CONFIG }}
-         echo "CONFIG_KVM=y" >> android-kernel/arch/arm64/configs/${{ env.KERNEL_CONFIG }}
-         echo "CONFIG_VHOST_NET=y" >> android-kernel/arch/arm64/configs/${{ env.KERNEL_CONFIG }}
-         echo "CONFIG_VHOST_CROSS_ENDIAN_LEGACY=y" >> android-kernel/arch/arm64/configs/${{ env.KERNEL_CONFIG }}
-                     
+         CONFIG=$(find . -name "${{ env.KERNEL_CONFIG }}" | head -1)
+         echo "CONFIG_VIRTUALIZATION=y" >> $CONFIG
+         echo "CONFIG_KVM=y" >> $CONFIG
+         echo "CONFIG_VHOST_NET=y" >> $CONFIG
+         echo "CONFIG_VHOST_CROSS_ENDIAN_LEGACY=y" >> $CONFIG
+         
     - name: 设置ccache缓存
       uses: hendrikmuhs/ccache-action@v1.2
       with:
         key: build-kernel-mido-kernel
         max-size: 2G
 
+    - name: 安装编译依赖
+      run: |
+        sudo apt update
+        sudo apt install -y build-essential gcc g++ make binutils libc6-dev flex bison libssl-dev bc cpio libtinfo5
+        
     - name: 开始编译内核
       run: |
-        cd $GITHUB_WORKSPACE/kernel_workspace/android-kernel
+        cd $GITHUB_WORKSPACE/kernel_workspace
         export PATH=$GITHUB_WORKSPACE/kernel_workspace/clang-mandi-sa/bin:$PATH
         export KBUILD_BUILD_HOST=17
         export KBUILD_BUILD_USER=HyperPower
