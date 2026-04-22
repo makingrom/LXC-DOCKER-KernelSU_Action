@@ -234,13 +234,13 @@ jobs:
     - name: 配置 ksu
       if: env.ENABLE_KERNELSU == 'true'
       run: |
-        cd $GITHUB_WORKSPACE/kernel_workspace
+        cd $GITHUB_WORKSPACE/kernel_workspace/android-kernel
         curl -LSs "https://raw.githubusercontent.com/tiann/KernelSU/main/kernel/setup.sh" | bash -s ${{ env.KERNELSU_TAG }}
 
     - name: 开启kvm
       if: env.ENABLE_KVM == 'true'
       run: |
-         cd $GITHUB_WORKSPACE/kernel_workspace
+         cd $GITHUB_WORKSPACE/kernel_workspace/android-kernel
          CONFIG=$(find . -name "${{ env.KERNEL_CONFIG }}" | head -1)
          echo "CONFIG_VIRTUALIZATION=y" >> $CONFIG
          echo "CONFIG_KVM=y" >> $CONFIG
