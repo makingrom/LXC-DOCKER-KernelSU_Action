@@ -71,14 +71,13 @@ jobs:
       if: env.ENABLE_LXC_DOCKER == 'true'
       run: |
         cd $GITHUB_WORKSPACE/kernel_workspace
-        CONFIG_FILE="android-kernel/arch/arm64/configs/${{ env.KERNEL_CONFIG }}"
+        CONFIG_FILE=$(find . -name "${{ env.KERNEL_CONFIG }}" | head -1)
+
+        echo "找到配置文件：$CONFIG_FILE"
 
         echo ">>> 正在注入完整 LXC/Docker 配置..."
-
-        # 1. 禁用 Paranoid Network (防止冲突)
         sed -i 's/CONFIG_ANDROID_PARANOID_NETWORK=y/# CONFIG_ANDROID_PARANOID_NETWORK is not set/g' $CONFIG_FILE
-
-        # 2. 基础命名空间与容器支持
+        
         cat >> $CONFIG_FILE <<EOF
         CONFIG_NAMESPACES=y
         CONFIG_UTS_NS=y
@@ -109,10 +108,6 @@ jobs:
         CONFIG_CGROUP_NET_CLASSID=y
         CONFIG_NETFILTER_XT_MATCH_CGROUP=y
         CONFIG_NETFILTER_XT_MATCH_OWNER=y
-        EOF
-
-        # 3. 网络过滤与 NAT 转发 (Docker 联网核心)
-        cat >> $CONFIG_FILE <<EOF
         CONFIG_NETFILTER=y
         CONFIG_NETFILTER_ADVANCED=y
         CONFIG_NF_CONNTRACK=y
