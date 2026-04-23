@@ -305,6 +305,17 @@ jobs:
           sudo ln -sf /usr/lib/x86_64-linux-gnu/libtinfo.so.6 /usr/lib/x86_64-linux-gnu/libtinfo.so.5
         fi
 
+        cd $GITHUB_WORKSPACE/kernel_workspace
+        if [ ! -d "android-ndk-r25b" ]; then
+          wget -q https://dl.google.com/android/repository/android-ndk-r25b-linux.zip
+          unzip -q android-ndk-r25b-linux.zip
+        fi
+
+        export NDK_PATH="${{ github.workspace }}/kernel_workspace/android-ndk-r25b"
+        export PATH="${NDK_PATH}/toolchains/llvm/prebuilt/linux-x86_64/bin:$PATH"
+        echo "NDK_PATH=${NDK_PATH}" >> $GITHUB_ENV
+        echo "PATH=${NDK_PATH}/toolchains/llvm/prebuilt/linux-x86_64/bin:$PATH" >> $GITHUB_ENV
+
     - name: 验证交叉编译工具链
       run: |
         # 安装ARM64交叉编译工具链（确保完整）
@@ -337,8 +348,7 @@ jobs:
         file $GITHUB_WORKSPACE/kernel_workspace/clang-mandi-sa/bin/clang
         export HOSTARCH=x86_64
         make clean && make mrproper
-        
-        make vmlinux O=out ARCH=arm64 CROSS_COMPILE=aarch64-linux-gnu- KCFLAGS="-w -Wno-error" KBUILD_CFLAGS="-w -Wno-error" KBUILD_CPPFLAGS="-w -Wno-error"
+        make vmlinux O=out ARCH=arm64 CC=clang CXX=clang++ CLANG_TRIPLE=aarch64-linux-android- CROSS_COMPILE=aarch64-linux-android- LD=ld.lld AR=llvm-ar NM=llvm-nm OBJCOPY=llvm-objcopy OBJDUMP=llvm-objdump STRIP=llvm-strip KCFLAGS="-w"
         
     #     make ${{ env.KERNEL_CONFIG }} O=out ARCH=arm64 CC=clang CXX=clang++ CLANG_TRIPLE=aarch64-linux-gnu- CROSS_COMPILE=aarch64-linux-gnu- LLVM=1 LLVM_IAS=1
     #     make -j$nproc --all) O=out ARCH=arm64 CC=clang CXX=clang++ CLANG_TRIPLE=aarch64-linux-gnu- CROSS_COMPILE=aarch64-linux-gnu- LLVM=1 LLVM_IAS=1 KCFLAGS="-Wno-error -Wno-gnu-variable-sized-type-not-at-end" KBUILD_CFLAGS="-Wno-error -Wno-gnu-variable-sized-type-not-at-end"
