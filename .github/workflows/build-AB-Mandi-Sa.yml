@@ -31,7 +31,22 @@ jobs:
         sudo apt-get update
         sudo -E apt-get -y -qq install git make bc bison ccache openssl zip kmod cpio flex libelf-dev curl libssl-dev libtfm-dev wget device-tree-compiler ca-certificates python3 binutils binutils-aarch64-linux-gnu binutils-arm-linux-gnueabi
         mkdir -p $GITHUB_WORKSPACE/kernel_workspace
-        
+
+    - name: 缓存内核源码与工具链
+      uses: actions/cache@v5
+      with:
+        path: |
+          ${{ github.workspace }}/kernel_workspace
+          ${{ github.workspace }}/clang-mandi-sa
+          /usr/local/bin/python2.7
+          /usr/local/include/python2.7
+          /usr/local/lib/python2.7
+          /usr/local/lib/libpython2.7*
+          /usr/local/share/man/man1/python2.7.1
+        key: ${{ runner.os }}-kernel-llvm22-${{ hashFiles('config.env') }}
+        restore-keys: |
+          ${{ runner.os }}-kernel-
+          
     - name: 编译并切换 Python 2.7
       if: env.SWITCH_PYTHON == 'true'
       run: |
@@ -56,16 +71,6 @@ jobs:
 
         python -V
 
-    - name: 缓存内核源码与工具链
-      uses: actions/cache@v5
-      with:
-        path: |
-          ${{ github.workspace }}/kernel_workspace
-          ${{ github.workspace }}/clang-mandi-sa
-        key: ${{ runner.os }}-kernel-llvm22-${{ hashFiles('config.env') }}
-        restore-keys: |
-          ${{ runner.os }}-kernel-
-            
     - name: 下载 LLVM Clang工具链 (64位)
       run: |
         cd $GITHUB_WORKSPACE/kernel_workspace
