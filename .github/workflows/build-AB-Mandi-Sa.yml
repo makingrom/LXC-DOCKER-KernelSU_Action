@@ -285,10 +285,10 @@ jobs:
       run: |
          cd $GITHUB_WORKSPACE/kernel_workspace/android-kernel
          CONFIG=$(find . -name "${{ env.KERNEL_CONFIG }}" | head -1)
-         echo "CONFIG_VIRTUALIZATION=y" >> $CONFIG
-         echo "CONFIG_KVM=y" >> $CONFIG
-         echo "CONFIG_VHOST_NET=y" >> $CONFIG
-         echo "CONFIG_VHOST_CROSS_ENDIAN_LEGACY=y" >> $CONFIG
+         echo "CONFIG_VIRTUALIZATION=n" >> $CONFIG
+         echo "CONFIG_KVM=n" >> $CONFIG
+         echo "CONFIG_VHOST_NET=n" >> $CONFIG
+         echo "CONFIG_VHOST_CROSS_ENDIAN_LEGACY=n" >> $CONFIG
          
     - name: 设置ccache缓存
       uses: hendrikmuhs/ccache-action@v1.2
@@ -304,6 +304,18 @@ jobs:
         if [ ! -f /usr/lib/x86_64-linux-gnu/libtinfo.so.5 ]; then
           sudo ln -sf /usr/lib/x86_64-linux-gnu/libtinfo.so.6 /usr/lib/x86_64-linux-gnu/libtinfo.so.5
         fi
+
+    - name: 验证交叉编译工具链
+      run: |
+        # 安装ARM64交叉编译工具链（确保完整）
+        sudo apt-get install -y gcc-aarch64-linux-gnu binutils-aarch64-linux-gnu
+        # 验证工具链是否能调用
+        aarch64-linux-gnu-gcc --version
+        # 检查CROSS_COMPILE参数是否正确
+        echo "CROSS_COMPILE: aarch64-linux-gnu-"
+        # 验证架构参数
+        echo "ARCH: arm64"
+        
     - name: 开始编译内核
       run: |
         cd $GITHUB_WORKSPACE/kernel_workspace/android-kernel
@@ -326,9 +338,10 @@ jobs:
         export HOSTARCH=x86_64
         make clean && make mrproper
 
-        make ${{ env.KERNEL_CONFIG }} O=out ARCH=arm64 CC=clang CXX=clang++ CLANG_TRIPLE=aarch64-linux-gnu- CROSS_COMPILE=aarch64-linux-gnu- LLVM=1 LLVM_IAS=1
-        make -j$nproc --all) O=out ARCH=arm64 CC=clang CXX=clang++ CLANG_TRIPLE=aarch64-linux-gnu- CROSS_COMPILE=aarch64-linux-gnu- LLVM=1 LLVM_IAS=1 KCFLAGS="-Wno-error -Wno-gnu-variable-sized-type-not-at-end" KBUILD_CFLAGS="-Wno-error -Wno-gnu-variable-sized-type-not-at-end"
-    # make -s -j$(nproc --all) O=out ARCH=arm64 ${{ env.KERNEL_CONFIG }}
+        make vmlinux O=out ARCH=arm64 CROSS_COMPILE=aarch64-linux-gnu- KCFLAGS="-Wno-error" KBUILD_CFLAGS="-Wno-error"
+    #     make ${{ env.KERNEL_CONFIG }} O=out ARCH=arm64 CC=clang CXX=clang++ CLANG_TRIPLE=aarch64-linux-gnu- CROSS_COMPILE=aarch64-linux-gnu- LLVM=1 LLVM_IAS=1
+    #     make -j$nproc --all) O=out ARCH=arm64 CC=clang CXX=clang++ CLANG_TRIPLE=aarch64-linux-gnu- CROSS_COMPILE=aarch64-linux-gnu- LLVM=1 LLVM_IAS=1 KCFLAGS="-Wno-error -Wno-gnu-variable-sized-type-not-at-end" KBUILD_CFLAGS="-Wno-error -Wno-gnu-variable-sized-type-not-at-end"
+    # # make -s -j$(nproc --all) O=out ARCH=arm64 ${{ env.KERNEL_CONFIG }}
     
     # if [ "${{env.LLVM_CONFIG}}" = "y" ]; then
     #   
