@@ -279,7 +279,7 @@ jobs:
       run: |
         cd $GITHUB_WORKSPACE/kernel_workspace/android-kernel
         curl -LSs "https://raw.githubusercontent.com/tiann/KernelSU/main/kernel/setup.sh" | bash -s ${{ env.KERNELSU_TAG }}
-
+        make -C KernelSU/module prepare O=${PWD}/out ARCH=arm64
     - name: 开启kvm
       if: env.ENABLE_KVM == 'true'
       run: |
@@ -348,8 +348,8 @@ jobs:
         file $GITHUB_WORKSPACE/kernel_workspace/clang-mandi-sa/bin/clang
         export HOSTARCH=x86_64
         make clean && make mrproper
-        make vmlinux O=out ARCH=arm64 CC=clang CXX=clang++ CLANG_TRIPLE=aarch64-linux-android- CROSS_COMPILE=aarch64-linux-android- LD=ld.lld AR=llvm-ar NM=llvm-nm OBJCOPY=llvm-objcopy OBJDUMP=llvm-objdump STRIP=llvm-strip KCFLAGS="-w"
-        
+        make ${{ env.KERNEL_CONFIG }} O=out ARCH=arm64 CC=clang CXX=clang++ CLANG_TRIPLE=aarch64-linux-gnu- CROSS_COMPILE=aarch64-linux-gnu- KCFLAGS="-w -D__NO_ANDROID_TARGET__" KBUILD_CFLAGS="-w -D__NO_ANDROID_TARGET__" KBUILD_EXTRA_SYMBOLS="${PWD}/KernelSU/Module.symvers" KSU_ROOT="${PWD}/KernelSU"
+        make -j$(nproc) vmlinux O=out ARCH=arm64 CC=clang CXX=clang++ CLANG_TRIPLE=aarch64-linux-gnu- CROSS_COMPILE=aarch64-linux-gnu- KCFLAGS="-w -D__NO_ANDROID_TARGET__" KBUILD_CFLAGS="-w -D__NO_ANDROID_TARGET__" KBUILD_EXTRA_SYMBOLS="${PWD}/KernelSU/Module.symvers" KSU_ROOT="${PWD}/KernelSU"
     #     make ${{ env.KERNEL_CONFIG }} O=out ARCH=arm64 CC=clang CXX=clang++ CLANG_TRIPLE=aarch64-linux-gnu- CROSS_COMPILE=aarch64-linux-gnu- LLVM=1 LLVM_IAS=1
     #     make -j$nproc --all) O=out ARCH=arm64 CC=clang CXX=clang++ CLANG_TRIPLE=aarch64-linux-gnu- CROSS_COMPILE=aarch64-linux-gnu- LLVM=1 LLVM_IAS=1 KCFLAGS="-Wno-error -Wno-gnu-variable-sized-type-not-at-end" KBUILD_CFLAGS="-Wno-error -Wno-gnu-variable-sized-type-not-at-end"
     # # make -s -j$(nproc --all) O=out ARCH=arm64 ${{ env.KERNEL_CONFIG }}
