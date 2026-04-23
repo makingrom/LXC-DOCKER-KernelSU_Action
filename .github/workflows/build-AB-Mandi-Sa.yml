@@ -281,65 +281,76 @@ jobs:
         if [ ! -f /usr/lib/x86_64-linux-gnu/libtinfo.so.5 ]; then
           sudo ln -sf /usr/lib/x86_64-linux-gnu/libtinfo.so.6 /usr/lib/x86_64-linux-gnu/libtinfo.so.5
         fi
-    # - name: 开始编译内核
-    #   run: |
-    #     cd $GITHUB_WORKSPACE/kernel_workspace/android-kernel
-    #     cp arch/arm64/configs/vendor/ZS673KS_defconfig arch/arm64/configs/
-    #     echo "🔍 正在搜索 ZS673KS_defconfig..."
-    #     FOUND_FILE=$(find . -name "ZS673KS_defconfig")
+    - name: 开始编译内核
+      run: |
+        cd $GITHUB_WORKSPACE/kernel_workspace/android-kernel
+        cp arch/arm64/configs/vendor/ZS673KS_defconfig arch/arm64/configs/
+        echo "🔍 正在搜索 ZS673KS_defconfig..."
+        FOUND_FILE=$(find . -name "ZS673KS_defconfig")
 
-    #     if [ -z "$FOUND_FILE" ]; then
-    #         echo "❌ 错误：找不到 ZS673KS_defconfig！请检查源码是否正确下载。"
-    #       exit 1
-    #     else
-    #       echo "✅ 找到文件：$FOUND_FILE"
-    #     fi
+        if [ -z "$FOUND_FILE" ]; then
+            echo "❌ 错误：找不到 ZS673KS_defconfig！请检查源码是否正确下载。"
+          exit 1
+        else
+          echo "✅ 找到文件：$FOUND_FILE"
+        fi
         
-    #     export PATH=$GITHUB_WORKSPACE/kernel_workspace/clang-mandi-sa/bin:$PATH
-    #     export KBUILD_BUILD_HOST=17
-    #     export KBUILD_BUILD_USER=HyperPower
+        export PATH=$GITHUB_WORKSPACE/kernel_workspace/clang-mandi-sa/bin:$PATH
+        export KBUILD_BUILD_HOST=17
+        export KBUILD_BUILD_USER=HyperPower
         
-    #     file $GITHUB_WORKSPACE/kernel_workspace/clang-mandi-sa/bin/clang
-    #     export HOSTARCH=x86_64
+        file $GITHUB_WORKSPACE/kernel_workspace/clang-mandi-sa/bin/clang
+        export HOSTARCH=x86_64
         
-    #     make -s -j$(nproc --all) O=out ARCH=arm64 ${{ env.KERNEL_CONFIG }}
+        make -s -j$(nproc --all) O=out ARCH=arm64 ${{ env.KERNEL_CONFIG }}
         
-    #     if [ "${{env.LLVM_CONFIG}}" = "y" ]; then
-    #       make -j$(nproc --all) CONFIG_DEBUG_SECTION_MISMATCH=y CC="ccache clang" CXX=clang++ O=out ARCH=arm64 CLANG_TRIPLE="aarch64-linux-gnu-" CROSS_COMPILE="aarch64-linux-gnu-" CROSS_COMPILE_ARM32="arm-linux-gnueabi-" LLVM=1 LLVM_IAS=1 KCFLAGS="-Wno-error" KBUILD_CFLAGS="-Wno-error"
-    #     else
-    #       make -j$(nproc --all) CONFIG_DEBUG_SECTION_MISMATCH=y CC="ccache clang" CXX=clang++ O=out ARCH=arm64 CLANG_TRIPLE="aarch64-linux-gnu-" CROSS_COMPILE="aarch64-linux-gnu-" CROSS_COMPILE_ARM32="arm-linux-gnueabi-" KCFLAGS="-Wno-error" KBUILD_CFLAGS="-Wno-error"
-    #     fi
+        if [ "${{env.LLVM_CONFIG}}" = "y" ]; then
+          make -j$(nproc --all) CONFIG_DEBUG_SECTION_MISMATCH=y CC="ccache clang" CXX=clang++ O=out ARCH=arm64 CLANG_TRIPLE="aarch64-linux-gnu-" CROSS_COMPILE="aarch64-linux-gnu-" CROSS_COMPILE_ARM32="arm-linux-gnueabi-" LLVM=1 LLVM_IAS=1 KCFLAGS="-Wno-error" KBUILD_CFLAGS="-Wno-error"
+        else
+          make -j$(nproc --all) CONFIG_DEBUG_SECTION_MISMATCH=y CC="ccache clang" CXX=clang++ O=out ARCH=arm64 CLANG_TRIPLE="aarch64-linux-gnu-" CROSS_COMPILE="aarch64-linux-gnu-" CROSS_COMPILE_ARM32="arm-linux-gnueabi-" KCFLAGS="-Wno-error" KBUILD_CFLAGS="-Wno-error"
+        fi
         
-    # - name: 准备打包内核
-    #   run: |       
-    #     cd $GITHUB_WORKSPACE/kernel_workspace
-    #     git clone https://github.com/osm0sis/AnyKernel3
-    #     sed -i 's/do.devicecheck=1/do.devicecheck=0/g' AnyKernel3/anykernel.sh
-    #     sed -i 's!block=/dev/block/platform/omap/omap_hsmmc.0/by-name/boot;!block=auto;!g' AnyKernel3/anykernel.sh
-    #     sed -i 's/is_slot_device=1;/is_slot_device=auto;/g' AnyKernel3/anykernel.sh        
-    #     cp android-kernel/out/arch/arm64/boot/${{ env.KERNEL_IMAGE_NAME }} AnyKernel3/
-    #     if [ ${{ env.NEED_DTBO }} = true ]; then
-    #         echo "NEED=true" >> $GITHUB_ENV
-    #         if [ -f android-kernel/out/arch/arm64/boot/dtbo.img ]; then
-    #             echo "DTBO_EXIST=true" >> $GITHUB_ENV           
-    #         fi
-    #     fi        
-    #     if [ ${{ env.DTBO_EXIST }} = true ]; then
-    #         cp android-kernel/out/arch/arm64/boot/dtbo.img AnyKernel3/
-    #     fi  
-    #     rm -rf AnyKernel3/.git* AnyKernel3/README.md
-    #     rm -rf AnyKernel3/ramdisk AnyKernel3/modules AnyKernel3/patch
+    - name: 准备打包内核
+      run: |       
+        cd $GITHUB_WORKSPACE/kernel_workspace
+        git clone https://github.com/osm0sis/AnyKernel3
+        sed -i 's/do.devicecheck=1/do.devicecheck=0/g' AnyKernel3/anykernel.sh
+        sed -i 's!block=/dev/block/platform/omap/omap_hsmmc.0/by-name/boot;!block=auto;!g' AnyKernel3/anykernel.sh
+        sed -i 's/is_slot_device=1;/is_slot_device=auto;/g' AnyKernel3/anykernel.sh        
+        cp android-kernel/out/arch/arm64/boot/${{ env.KERNEL_IMAGE_NAME }} AnyKernel3/
+        if [ ${{ env.NEED_DTBO }} = true ]; then
+            echo "NEED=true" >> $GITHUB_ENV
+            if [ -f android-kernel/out/arch/arm64/boot/dtbo.img ]; then
+                echo "DTBO_EXIST=true" >> $GITHUB_ENV           
+            fi
+        fi        
+        if [ ${{ env.DTBO_EXIST }} = true ]; then
+            cp android-kernel/out/arch/arm64/boot/dtbo.img AnyKernel3/
+        fi  
+        rm -rf AnyKernel3/.git* AnyKernel3/README.md
+        rm -rf AnyKernel3/ramdisk AnyKernel3/modules AnyKernel3/patch
         
-    # - name: 上传内核
-    #   uses: actions/upload-artifact@v5
-    #   with:
-    #     name: ${{ env.KERNEL_ZIP_NAME }}
-    #     path: kernel_workspace/AnyKernel3/*
+    - name: 上传内核
+      uses: actions/upload-artifact@v5
+      with:
+        name: ${{ env.KERNEL_ZIP_NAME }}
+        path: kernel_workspace/AnyKernel3/*
 
-    # - name: 上传dtbo镜像
-    #   if: env.DTBO_EXSIT == 'true' && env.NEED == 'true'
-    #   uses: actions/upload-artifact@v5
-    #   with:
-    #     name: dtbo-image
-    #     path: kernel_workspace/android-kernel/out/arch/arm64/boot/dtbo.img
-          
+    - name: 上传dtbo镜像
+      if: env.DTBO_EXSIT == 'true' && env.NEED == 'true'
+      uses: actions/upload-artifact@v5
+      with:
+        name: dtbo-image
+        path: kernel_workspace/android-kernel/out/arch/arm64/boot/dtbo.img
+        
+    - name: 强制保存缓存
+      if: always()  # 关键：无论前面步骤成功/失败，都执行
+      uses: actions/cache/save@v3
+      with:
+        path: |
+          ${{ github.workspace }}/kernel_workspace
+          ${{ github.workspace }}/clang-mandi-sa
+          /usr/local/bin/python2.7
+          /usr/local/include/python2.7
+          /usr/local/lib/python2.7
+        key: ${{ runner.os }}-kernel-clang-r416183b-${{ hashFiles('config.env') }}
