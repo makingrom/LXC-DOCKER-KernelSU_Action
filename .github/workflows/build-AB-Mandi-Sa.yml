@@ -48,6 +48,18 @@ jobs:
     - name: 编译并切换 Python 2.7
       if: env.SWITCH_PYTHON == 'true'
       run: |
+        PYTHON_DIR="${{ github.workspace }}/kernel_workspace/python2.7"
+        PYTHON_BIN="${PYTHON_DIR}/bin/python2.7"
+
+        if [ ! -f "${PYTHON_BIN}" ]; then
+          cd /tmp && wget -q https://www.python.org/ftp/python/2.7.18/Python-2.7.18.tgz && tar -xf Python-2.7.18.tgz
+          cd /tmp/Python-2.7.18 && ./configure --prefix="${PYTHON_DIR}" >/dev/null && make -j2 >/dev/null && make install >/dev/null
+          echo "✅ Python 2.7 编译完成"
+        else
+          echo "✅ Python 2.7 已缓存，跳过编译"
+        fi
+        
+        echo "PATH=${PYTHON_DIR}/bin:$PATH" >> $GITHUB_ENV
         sudo rm -f /usr/bin/python
         sudo ln -s /usr/bin/python2.7 /usr/bin/python
         python --version
