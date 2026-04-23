@@ -338,7 +338,7 @@ jobs:
         export HOSTARCH=x86_64
         make clean && make mrproper
 
-        make vmlinux O=out ARCH=arm64 CROSS_COMPILE=aarch64-linux-gnu- KCFLAGS="-Wno-error" KBUILD_CFLAGS="-Wno-error"
+        make vmlinux O=out ARCH=arm64 CROSS_COMPILE=aarch64-linux-gnu- KCFLAGS="-Wno-error -Wno-format-security -Werror=none" KBUILD_CFLAGS="-Wno-error -Wno-format-security -Werror=none" KBUILD_CPPFLAGS="-Wno-error -Wno-format-security -Werror=none"
     #     make ${{ env.KERNEL_CONFIG }} O=out ARCH=arm64 CC=clang CXX=clang++ CLANG_TRIPLE=aarch64-linux-gnu- CROSS_COMPILE=aarch64-linux-gnu- LLVM=1 LLVM_IAS=1
     #     make -j$nproc --all) O=out ARCH=arm64 CC=clang CXX=clang++ CLANG_TRIPLE=aarch64-linux-gnu- CROSS_COMPILE=aarch64-linux-gnu- LLVM=1 LLVM_IAS=1 KCFLAGS="-Wno-error -Wno-gnu-variable-sized-type-not-at-end" KBUILD_CFLAGS="-Wno-error -Wno-gnu-variable-sized-type-not-at-end"
     # # make -s -j$(nproc --all) O=out ARCH=arm64 ${{ env.KERNEL_CONFIG }}
