@@ -55,7 +55,17 @@ jobs:
         sudo ln -s /usr/local/bin/python2.7 /usr/bin/python
 
         python -V
-        
+
+    - name: 缓存内核源码与工具链
+      uses: actions/cache@v5
+      with:
+        path: |
+          ${{ github.workspace }}/kernel_workspace
+          ${{ github.workspace }}/clang-mandi-sa
+        key: ${{ runner.os }}-kernel-llvm22-${{ hashFiles('config.env') }}
+        restore-keys: |
+          ${{ runner.os }}-kernel-
+            
     - name: 下载 LLVM Clang工具链 (64位)
       run: |
         cd $GITHUB_WORKSPACE/kernel_workspace
