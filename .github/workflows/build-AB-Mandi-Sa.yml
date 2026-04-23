@@ -279,21 +279,7 @@ jobs:
       run: |
         cd $GITHUB_WORKSPACE/kernel_workspace/android-kernel
         curl -LSs "https://raw.githubusercontent.com/tiann/KernelSU/main/kernel/setup.sh" | bash -s ${{ env.KERNELSU_TAG }}
-        if [ ! -d "KernelSU" ]; then
-          git clone https://github.com/tiann/KernelSU.git KernelSU
-        else
-          cd KernelSU && git pull
-          cd ..
-        fi
-        if [ -d "KernelSU/module" ]; then
-          echo "✅ KernelSU module目录存在"
-        else
-          echo "❌ KernelSU module目录缺失，重新拉取子模块"
-          cd KernelSU && git submodule update --init --recursive
-        fi
-        cd module
-        make prepare O=${{ github.workspace }}/kernel_workspace/android-kernel/out ARCH=arm64
-        cp Module.symvers ${{ github.workspace }}/kernel_workspace/android-kernel/
+        
     - name: 开启kvm
       if: env.ENABLE_KVM == 'true'
       run: |
