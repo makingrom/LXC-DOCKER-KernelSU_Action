@@ -103,18 +103,21 @@ jobs:
       if: env.USE_CUSTOM_CLANG == 'true'
       run: |
         cd $GITHUB_WORKSPACE/kernel_workspace
-        if [[ ${{ env.CUSTOM_CLANG_SOURCE }} =~ git ]]; then
-            if [[ ${{ env.CUSTOM_CLANG_SOURCE }} == *'.tar.gz' ]]; then
-                wget -O clang.tar.gz ${{ env.CUSTOM_CLANG_SOURCE }}
-                mkdir clang-aosp
-                tar -C clang-aosp/ -zxvf clang.tar.gz
-            else
-                git clone ${{ env.CUSTOM_CLANG_SOURCE }} -b ${{ env.CUSTOM_CLANG_BRANCH }} clang-aosp --depth=1
-            fi
-        else
+        
+        if [[ ${{ env.CUSTOM_CLANG_SOURCE }} == *'.tar.gz' ]]; then
+            wget -O clang.tar.gz ${{ env.CUSTOM_CLANG_SOURCE }}
+            mkdir clang-aosp
+            tar -C clang-aosp/ -zxvf clang.tar.gz
+        
+        elif [[ ${{ env.CUSTOM_CLANG_SOURCE }} =~ git ]]; then
+            git clone ${{ env.CUSTOM_CLANG_SOURCE }} -b ${{ env.CUSTOM_CLANG_BRANCH }} clang-aosp --depth=1
+        
+        elif [[ ${{ env.CUSTOM_CLANG_SOURCE }} == *'.zip' ]]; then
             wget -O clang.zip ${{ env.CUSTOM_CLANG_SOURCE }}
             mkdir clang-aosp
             unzip clang.zip -d clang-aosp/
+        else
+            echo "请确认clang工具链的文件格式！！！" && exit 1
         fi
 
     - name: Download Gcc-aosp
