@@ -39,8 +39,10 @@ jobs:
           ${{ github.workspace }}/kernel_workspace
           ${{ github.workspace }}/clang-mandi-sa
           ${{ github.workspace }}/kernel_workspace/cache/Python-2.7.18.tgz
-        key: ${{ runner.os }}-kernel-clang-r416183b-${{ hashFiles('config.env') }}
+        
+        key: ${{ runner.os }}-kernel-clang-r416183b-fixed
         restore-keys: |
+          ${{ runner.os }}-kernel-clang-r416183b-
           ${{ runner.os }}-kernel-
           
     - name: 编译并切换 Python 2.7
@@ -322,15 +324,18 @@ jobs:
         
         file $GITHUB_WORKSPACE/kernel_workspace/clang-mandi-sa/bin/clang
         export HOSTARCH=x86_64
-        
-        make -s -j$(nproc --all) O=out ARCH=arm64 ${{ env.KERNEL_CONFIG }}
-        
-        if [ "${{env.LLVM_CONFIG}}" = "y" ]; then
-          make -j$(nproc --all) CONFIG_DEBUG_SECTION_MISMATCH=y CC="ccache clang" CXX=clang++ O=out ARCH=arm64 CLANG_TRIPLE="aarch64-linux-gnu-" CROSS_COMPILE="aarch64-linux-gnu-" CROSS_COMPILE_ARM32="arm-linux-gnueabi-" LLVM=1 LLVM_IAS=1 KCFLAGS="-Wno-error" KBUILD_CFLAGS="-Wno-error"
-        else
-          make -j$(nproc --all) CONFIG_DEBUG_SECTION_MISMATCH=y CC="ccache clang" CXX=clang++ O=out ARCH=arm64 CLANG_TRIPLE="aarch64-linux-gnu-" CROSS_COMPILE="aarch64-linux-gnu-" CROSS_COMPILE_ARM32="arm-linux-gnueabi-" KCFLAGS="-Wno-error" KBUILD_CFLAGS="-Wno-error"
-        fi
-        
+        make clean && make mrproper
+
+        make ${{ env.KERNEL_CONFIG }} O=out ARCH=arm64 CROSS_COMPILE=aarch64-linux-gnu-
+        make -j$(nproc) O=out ARCH=arm64 CROSS_COMPILE=aarch64-linux-gnu- KCFLAGS="-Wno-error" KBUILD_CFLAGS="-Wno-error"
+    # make -s -j$(nproc --all) O=out ARCH=arm64 ${{ env.KERNEL_CONFIG }}
+    
+    # if [ "${{env.LLVM_CONFIG}}" = "y" ]; then
+    #   make -j$(nproc --all) CONFIG_DEBUG_SECTION_MISMATCH=y CC="ccache clang" CXX=clang++ O=out ARCH=arm64 CLANG_TRIPLE="aarch64-linux-gnu-" CROSS_COMPILE="aarch64-linux-gnu-" CROSS_COMPILE_ARM32="arm-linux-gnueabi-" LLVM=1 LLVM_IAS=1 KCFLAGS="-Wno-error" KBUILD_CFLAGS="-Wno-error"
+    # else
+    #   make -j$(nproc --all) CONFIG_DEBUG_SECTION_MISMATCH=y CC="ccache clang" CXX=clang++ O=out ARCH=arm64 CLANG_TRIPLE="aarch64-linux-gnu-" CROSS_COMPILE="aarch64-linux-gnu-" CROSS_COMPILE_ARM32="arm-linux-gnueabi-" KCFLAGS="-Wno-error" KBUILD_CFLAGS="-Wno-error"
+    # fi
+    
     - name: 准备打包内核
       run: |       
         cd $GITHUB_WORKSPACE/kernel_workspace
