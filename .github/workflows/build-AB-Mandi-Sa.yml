@@ -90,17 +90,29 @@ jobs:
     - name: 下载 LLVM Clang工具链 (64位)
       run: |
         cd $GITHUB_WORKSPACE/kernel_workspace
-        
-        git clone --depth=1 https://github.com/LineageOS/android_prebuilts_clang_kernel_linux-x86_clang-r416183b clang-mandi-sa
-    
+
+        if [ ! -d "clang-mandi-sa" ]; then
+          git clone --depth=1 https://github.com/LineageOS/android_prebuilts_clang_kernel_linux-x86_clang-r416183b clang-mandi-sa
+        else
+          echo "✅ clang-mandi-sa 目录已存在（缓存恢复），跳过克隆！"
+        fi
+       
         echo "🔍 验证 Clang..."
         $GITHUB_WORKSPACE/kernel_workspace/clang-mandi-sa/bin/clang --version
         
     - name: 下载内核源码
       run: |
         cd $GITHUB_WORKSPACE/kernel_workspace
-        git clone ${{ env.KERNEL_SOURCE }} -b ${{ env.KERNEL_SOURCE_BRANCH }} android-kernel
-                      
+
+        if [ ! -d "android-kernel" ]; then
+          echo "📥 内核源码目录不存在，开始克隆..."
+          git clone ${{ env.KERNEL_SOURCE }} -b ${{ env.KERNEL_SOURCE_BRANCH }} android-kernel
+        else
+          echo "✅ android-kernel 目录已存在（缓存恢复），跳过克隆！"
+          cd android-kernel && git pull
+          cd ..
+        fi
+    
     - name: 开启lxc和docker配置
       if: env.ENABLE_LXC_DOCKER == 'true'
       run: |
