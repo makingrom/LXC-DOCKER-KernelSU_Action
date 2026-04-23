@@ -74,11 +74,10 @@ jobs:
     - name: 下载 LLVM Clang工具链 (64位)
       run: |
         cd $GITHUB_WORKSPACE/kernel_workspace
-
-        wget https://github.com/llvm/llvm-project/releases/download/llvmorg-22.1.4/LLVM-22.1.4-Linux-X64.tar.xz
-        tar -xf LLVM-22.1.4-Linux-X64.tar.xz
-        mv LLVM-22.1.4-Linux-X64 clang-mandi-sa
         
+        wget https://github.com/llvm/llvm-project/releases/download/llvmorg-17.0.6/clang+llvm-17.0.6-x86_64-linux-gnu-ubuntu-22.04.tar.xz
+        tar -xf clang+llvm-17.0.6-x86_64-linux-gnu-ubuntu-22.04.tar.xz
+        mv clang+llvm-17.0.6-x86_64-linux-gnu-ubuntu-22.04 clang-mandi-sa
         echo "🔍 验证 Clang..."
         $GITHUB_WORKSPACE/kernel_workspace/clang-mandi-sa/bin/clang --version
         
