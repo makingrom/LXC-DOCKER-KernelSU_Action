@@ -279,6 +279,11 @@ jobs:
       run: |
         cd $GITHUB_WORKSPACE/kernel_workspace/android-kernel
         curl -LSs "https://raw.githubusercontent.com/tiann/KernelSU/main/kernel/setup.sh" | bash -s ${{ env.KERNELSU_TAG }}
+        if [ ! -d "KernelSU" ]; then
+          git clone https://github.com/tiann/KernelSU.git KernelSU
+        else
+          cd KernelSU && git pull
+        fi
         make -C KernelSU/module prepare O=${PWD}/out ARCH=arm64
     - name: 开启kvm
       if: env.ENABLE_KVM == 'true'
