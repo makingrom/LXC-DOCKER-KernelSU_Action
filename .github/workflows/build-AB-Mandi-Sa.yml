@@ -38,7 +38,7 @@ jobs:
         path: |
           ${{ github.workspace }}/kernel_workspace
           ${{ github.workspace }}/clang-mandi-sa
-          ${{ github.workspace }}/kernel_workspace/python2.7_cache
+          ${{ github.workspace }}/kernel_workspace/cache/Python-2.7.18.tgz
         key: ${{ runner.os }}-kernel-clang-r416183b-${{ hashFiles('config.env') }}
         restore-keys: |
           ${{ runner.os }}-kernel-
@@ -46,38 +46,36 @@ jobs:
     - name: 编译并切换 Python 2.7
       if: env.SWITCH_PYTHON == 'true'
       run: |
-        PYTHON_CACHE_DIR="${{ github.workspace }}/kernel_workspace/python2.7_cache"
-        if [ -d "${PYTHON_CACHE_DIR}/usr/local/bin" ]; then
-          echo "✅ 恢复Python缓存，跳过编译！"
-          sudo cp -rf "${PYTHON_CACHE_DIR}/usr/local/"* /usr/local/
-          sudo ln -sf /usr/local/bin/python2.7 /usr/local/bin/python2
+        PYTHON_TGZ_CACHE="${{ github.workspace }}/kernel_workspace/cache/Python-2.7.18.tgz"
+        mkdir -p "${{ github.workspace }}/kernel_workspace/cache"
+        sudo apt-get update
+        sudo apt-get install -y build-essential checkinstall libreadline-dev libncursesw5-dev libssl-dev libsqlite3-dev tk-dev libgdbm-dev libc6-dev libbz2-dev libffi-dev zlib1g-dev
+        
+        if [ -f "${PYTHON_TGZ_CACHE}" ]; then
+          echo "✅ 缓存存在Python源码包，复制到/tmp..."
+          cp "${PYTHON_TGZ_CACHE}" /tmp/
         else
-          if ! command -v python2 &> /dev/null; then
-            echo "Python 2 未找到，开始从源码编译安装..."
-            sudo apt-get update
-            sudo apt-get install -y build-essential checkinstall libreadline-dev libncursesw5-dev libssl-dev libsqlite3-dev tk-dev libgdbm-dev libc6-dev libbz2-dev libffi-dev zlib1g-dev
+          echo "❌ 无缓存，开始下载Python源码包..."
+          cd /tmp
+          wget https://www.python.org/ftp/python/2.7.18/Python-2.7.18.tgz
+          cp /tmp/Python-2.7.18.tgz "${PYTHON_TGZ_CACHE}"
+        fi
 
-            cd /tmp
-            wget https://www.python.org/ftp/python/2.7.18/Python-2.7.18.tgz
-            tar xzf Python-2.7.18.tgz
-            cd Python-2.7.18
-            ./configure --enable-optimizations
-            sudo make altinstall
-          else
-            echo "Python 2 已安装，跳过编译步骤。"
-          fi
-
-          echo "✅ 保存Python到缓存目录..."
-          sudo mkdir -p "${PYTHON_CACHE_DIR}"
-          sudo cp -rf /usr/local/bin/python2.7* "${PYTHON_CACHE_DIR}/usr/local/bin/"
-          sudo cp -rf /usr/local/lib/python2.7 "${PYTHON_CACHE_DIR}/usr/local/lib/"
-          sudo cp -rf /usr/local/include/python2.7 "${PYTHON_CACHE_DIR}/usr/local/include/"
+        if ! command -v python2 &> /dev/null; then
+          echo "Python 2 未找到，开始从源码编译安装..."
+          cd /tmp
+          tar xzf Python-2.7.18.tgz
+          cd Python-2.7.18
+          ./configure --enable-optimizations
+          sudo make altinstall
+        else
+          echo "Python 2 已安装，跳过编译步骤。"
         fi
 
         sudo rm -f /usr/bin/python
         sudo ln -s /usr/local/bin/python2.7 /usr/bin/python
-        sudo ln -sf /usr/local/bin/python2.7 /usr/local/bin/python2  # 新增：补全python2软链接
-
+        sudo ln -sf /usr/local/bin/python2.7 /usr/local/bin/python2
+        
         python --version
         python2.7 --version
         python2 --version
