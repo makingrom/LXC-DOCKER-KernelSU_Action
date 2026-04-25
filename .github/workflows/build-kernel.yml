@@ -159,7 +159,7 @@ jobs:
       if: env.USE_CUSTOM_GCC_64 != 'true' || env.USE_CUSTOM_GCC_32 != 'true'
       run: |
         cd $GITHUB_WORKSPACE/kernel_workspace
-        if [ ${{ env.ENABLE_GCC_ARM64 }} == 'true' ]; then
+        if [ ${{ env.ENABLE_GCC_ARM64 }} = true ]; then
             if [ ! -d "gcc-64" ]; then
                 echo "📥 gcc-64 目录不存在，开始下载克隆..."
                 mkdir gcc-64
@@ -170,7 +170,7 @@ jobs:
                 echo "✅ gcc-64 目录已存在（缓存恢复），跳过下载！"
             fi
         fi
-        if [ ${{ env.ENABLE_GCC_ARM32 }} == 'true' ]; then
+        if [ ${{ env.ENABLE_GCC_ARM32 }} = true ]; then
             if [ ! -d "gcc-32" ]; then
                 echo "📥 gcc-32 目录不存在，开始下载克隆..."
                 mkdir gcc-32
@@ -183,10 +183,10 @@ jobs:
         fi
 
     - name: Download Custom-Gcc
-      if: env.USE_CUSTOM_GCC_64 == 'true' || env.USE_CUSTOM_GCC_32 == 'true'
+      if: env.USE_CUSTOM_GCC_64 = true || env.USE_CUSTOM_GCC_32 == 'true'
       run: |
         cd $GITHUB_WORKSPACE/kernel_workspace
-        if [ ${{ env.USE_CUSTOM_GCC_64 }} == 'true' ]; then
+        if [ ${{ env.USE_CUSTOM_GCC_64 }} = true ]; then
             if [ ! -d "gcc-64" ]; then
             echo "📥 gcc-64 目录不存在，开始下载克隆..."
                 if [[ ${{ env.CUSTOM_GCC_64_SOURCE }} == *'.tar.gz' ]]; then
@@ -211,7 +211,7 @@ jobs:
             echo "GCC_64=CROSS_COMPILE=$GITHUB_WORKSPACE/kernel_workspace/gcc-64/bin/${{ env.CUSTOM_GCC_64_BIN }}" >> $GITHUB_ENV || echo "⚠️ 写入 gcc-64 失败"
         fi
 
-        if [ ${{ env.USE_CUSTOM_GCC_32 }} == 'true' ]; then
+        if [ ${{ env.USE_CUSTOM_GCC_32 }} = true ]; then
             if [ ! -d "gcc-32" ]; then
                 echo "📥 gcc-32 目录不存在，开始下载克隆..."
                 if [[ ${{ env.CUSTOM_GCC_32_SOURCE }} == *'.tar.gz' ]]; then
@@ -256,7 +256,7 @@ jobs:
             echo "✅ android-kernel 目录已存在（缓存恢复），跳过下载！开始同步！"
             cd android-kernel && git pull
         fi
-        if [[ ${{ env.ADD_LOCALVERSION_TO_FILENAME }} == 'true' ]]; then
+        if [[ ${{ env.ADD_LOCALVERSION_TO_FILENAME }} = true ]]; then
             echo "LOCALVERSION=$(cat android-kernel/localversion)" >> $GITHUB_ENV || echo "⚠️ 写入 LOCALVERSION 失败"
         else
             echo "LOCALVERSION=" >> $GITHUB_ENV || echo "⚠️ 写入 LOCALVERSION 失败"
@@ -287,103 +287,69 @@ jobs:
 
     - name: Setup Configuration for Kernel
       run: |
+        echo "当前目录：$(pwd)"
         cd $GITHUB_WORKSPACE/kernel_workspace/android-kernel
         if [ ${{ env.APPLY_KSU_PATCH }} = true ]; then
-            bash $GITHUB_WORKSPACE/patches/patches.sh
+            echo "当前目录：$(pwd)"
+            bash $GITHUB_WORKSPACE/patches/patches.sh || echo "patches.sh 执行失败，但继续"
             if grep -q "CONFIG_KSU" arch/${{ env.ARCH }}/configs/${{ env.KERNEL_CONFIG }}; then
                 sed -i 's/# CONFIG_KSU is not set/CONFIG_KSU=y/g' arch/${{ env.ARCH }}/configs/${{ env.KERNEL_CONFIG }}
                 sed -i 's/CONFIG_KSU=n/CONFIG_KSU=y/g' arch/${{ env.ARCH }}/configs/${{ env.KERNEL_CONFIG }}
             else
-                echo "CONFIG_KSU=y" >> arch/${{ env.ARCH }}/configs/${{ env.KERNEL_CONFIG }}
+                echo "CONFIG_KSU=y" >> arch/${{ env.ARCH }}/configs/${{ env.KERNEL_CONFIG }} || echo "⚠️ 开启 CONFIG_KSU 失败"
+            fi
+        else
+            echo "⚠️ 配置目录 $(pwd)"
+            if grep -q "CONFIG_KSU" arch/${{ env.ARCH }}/configs/${{ env.KERNEL_CONFIG }}; then
+                sed -i 's/# CONFIG_KSU is not set/CONFIG_KSU=y/g' arch/${{ env.ARCH }}/configs/${{ env.KERNEL_CONFIG }}
+                sed -i 's/CONFIG_KSU=n/CONFIG_KSU=y/g' arch/${{ env.ARCH }}/configs/${{ env.KERNEL_CONFIG }}
+            else
+                echo "CONFIG_KSU=n" >> arch/${{ env.ARCH }}/configs/${{ env.KERNEL_CONFIG }} || echo "⚠️ 关闭 CONFIG_KSU 失败"
             fi
         fi
+        echo "⚠️ 配置目录 $(pwd)"
         if [ ${{ env.ADD_KPROBES_CONFIG }} = true -a ${{ env.APPLY_KSU_PATCH }} != true ]; then
-            echo "CONFIG_MODULES=y" >> arch/${{ env.ARCH }}/configs/${{ env.KERNEL_CONFIG }}
-            echo "CONFIG_KPROBES=y" >> arch/${{ env.ARCH }}/configs/${{ env.KERNEL_CONFIG }}
-            echo "CONFIG_HAVE_KPROBES=y" >> arch/${{ env.ARCH }}/configs/${{ env.KERNEL_CONFIG }}
-            echo "CONFIG_KPROBE_EVENTS=y" >> arch/${{ env.ARCH }}/configs/${{ env.KERNEL_CONFIG }}
+            echo "CONFIG_MODULES=y" >> arch/${{ env.ARCH }}/configs/${{ env.KERNEL_CONFIG }} || echo "⚠️ 开启 MODULES 失败"
+            echo "CONFIG_KPROBES=y" >> arch/${{ env.ARCH }}/configs/${{ env.KERNEL_CONFIG }} || echo "⚠️ 开启 CONFIG_KPROBES 失败"
+            echo "CONFIG_HAVE_KPROBES=y" >> arch/${{ env.ARCH }}/configs/${{ env.KERNEL_CONFIG }} || echo "⚠️ 开启 CONFIG_HAVE_KPROBES 失败"
+            echo "CONFIG_KPROBE_EVENTS=y" >> arch/${{ env.ARCH }}/configs/${{ env.KERNEL_CONFIG }} || echo "⚠️ 开启 CONFIG_KPROBE_EVENTS 失败"
+        else
+            echo "CONFIG_MODULES=n" >> arch/${{ env.ARCH }}/configs/${{ env.KERNEL_CONFIG }} || echo "⚠️ 关闭 MODULES 失败"
+            echo "CONFIG_KPROBES=n" >> arch/${{ env.ARCH }}/configs/${{ env.KERNEL_CONFIG }} || echo "⚠️ 关闭 CONFIG_KPROBES 失败"
+            echo "CONFIG_HAVE_KPROBES=n" >> arch/${{ env.ARCH }}/configs/${{ env.KERNEL_CONFIG }} || echo "⚠️ 关闭 CONFIG_HAVE_KPROBES 失败"
+            echo "CONFIG_KPROBE_EVENTS=n" >> arch/${{ env.ARCH }}/configs/${{ env.KERNEL_CONFIG }} || echo "⚠️ 关闭 CONFIG_KPROBE_EVENTS 失败"
         fi
+        echo "⚠️ 配置目录 $(pwd)"
         if [ ${{ env.ADD_OVERLAYFS_CONFIG }} = true ]; then
-            echo "CONFIG_OVERLAY_FS=y" >> arch/${{ env.ARCH }}/configs/${{ env.KERNEL_CONFIG }}
+            echo "CONFIG_OVERLAY_FS=y" >> arch/${{ env.ARCH }}/configs/${{ env.KERNEL_CONFIG }} || echo "⚠️ 开启 CONFIG_OVERLAY_FS 失败"
+        else
+            echo "CONFIG_OVERLAY_FS=n" >> arch/${{ env.ARCH }}/configs/${{ env.KERNEL_CONFIG }} || echo "⚠️ 关闭 CONFIG_OVERLAY_FS 失败"
         fi
-        if [ ${{ env.DISABLE-LTO }} = true ]; then
+        echo "⚠️ 配置目录 $(pwd)"
+        if [ ${{ env.DISABLE_LTO }} = true ]; then
             sed -i 's/CONFIG_LTO=y/CONFIG_LTO=n/' arch/${{ env.ARCH }}/configs/${{ env.KERNEL_CONFIG }}
             sed -i 's/CONFIG_LTO_CLANG=y/CONFIG_LTO_CLANG=n/' arch/${{ env.ARCH }}/configs/${{ env.KERNEL_CONFIG }}
             sed -i 's/CONFIG_THINLTO=y/CONFIG_THINLTO=n/' arch/${{ env.ARCH }}/configs/${{ env.KERNEL_CONFIG }}
-            echo "CONFIG_LTO_NONE=y" >> arch/${{ env.ARCH }}/configs/${{ env.KERNEL_CONFIG }}
-        fi
-        if [ ${{ env.DISABLE_CC_WERROR }} = true ]; then
-            echo "CONFIG_CC_WERROR=n" >> arch/${{ env.ARCH }}/configs/${{ env.KERNEL_CONFIG }}
+            echo "CONFIG_LTO_NONE=y" >> arch/${{ env.ARCH }}/configs/${{ env.KERNEL_CONFIG }} || echo "⚠️ 开启 LTO 优化失败"
+        else
+            sed -i 's/CONFIG_LTO=y/CONFIG_LTO=n/' arch/${{ env.ARCH }}/configs/${{ env.KERNEL_CONFIG }}
+            sed -i 's/CONFIG_LTO_CLANG=y/CONFIG_LTO_CLANG=n/' arch/${{ env.ARCH }}/configs/${{ env.KERNEL_CONFIG }}
+            sed -i 's/CONFIG_THINLTO=y/CONFIG_THINLTO=n/' arch/${{ env.ARCH }}/configs/${{ env.KERNEL_CONFIG }}
+            echo "CONFIG_LTO_NONE=n" >> arch/${{ env.ARCH }}/configs/${{ env.KERNEL_CONFIG }} || echo "⚠️ 关闭 LTO 优化失败"
         fi
         echo "⚠️ 配置目录 $(pwd)"
-      # echo "当前目录：$(pwd)"
-      # cd $GITHUB_WORKSPACE/kernel_workspace/android-kernel
-      # if [ ${{ env.APPLY_KSU_PATCH }} == 'true' ]; then
-      #     echo "当前目录：$(pwd)"
-      #     if [ -f "$GITHUB_WORKSPACE/patches/patches.sh" ]; then
-      #         echo "当前目录：$(pwd)"
-      #         bash $GITHUB_WORKSPACE/patches/patches.sh || echo "patches.sh 执行失败，但继续"
-      #     else
-      #         echo "patches.sh 不存在，跳过"
-      #     fi
-      #     if grep -q "CONFIG_KSU" arch/${{ env.ARCH }}/configs/${{ env.KERNEL_CONFIG }}; then
-      #         sed -i 's/# CONFIG_KSU is not set/CONFIG_KSU=y/g' arch/${{ env.ARCH }}/configs/${{ env.KERNEL_CONFIG }}
-      #         sed -i 's/CONFIG_KSU=n/CONFIG_KSU=y/g' arch/${{ env.ARCH }}/configs/${{ env.KERNEL_CONFIG }}
-      #     else
-      #         echo "CONFIG_KSU=y" >> arch/${{ env.ARCH }}/configs/${{ env.KERNEL_CONFIG }} || echo "⚠️ 开启 CONFIG_KSU 失败"
-      #     fi
-      # elif [ -d $GITHUB_WORKSPACE/kernel_workspace/android-kernel/arch/${{ env.ARCH }}/configs/${{ env.KERNEL_CONFIG }} ]; then
-      #     echo "⚠️ 配置目录 $(pwd)"
-      #     if grep -q "CONFIG_KSU" arch/${{ env.ARCH }}/configs/${{ env.KERNEL_CONFIG }}; then
-      #         sed -i 's/# CONFIG_KSU is not set/CONFIG_KSU=y/g' arch/${{ env.ARCH }}/configs/${{ env.KERNEL_CONFIG }}
-      #         sed -i 's/CONFIG_KSU=n/CONFIG_KSU=y/g' arch/${{ env.ARCH }}/configs/${{ env.KERNEL_CONFIG }}
-      #     else
-      #         echo "CONFIG_KSU=n" >> arch/${{ env.ARCH }}/configs/${{ env.KERNEL_CONFIG }} || echo "⚠️ 关闭 CONFIG_KSU 失败"
-      #     fi
-      # fi
-      # echo "⚠️ 配置目录 $(pwd)"
-      # if [ ${{ env.ADD_KPROBES_CONFIG }} == 'true' -a ${{ env.APPLY_KSU_PATCH }} != 'true' ]; then
-      #     echo "CONFIG_MODULES=y" >> arch/${{ env.ARCH }}/configs/${{ env.KERNEL_CONFIG }} || echo "⚠️ 开启 MODULES 失败"
-      #     echo "CONFIG_KPROBES=y" >> arch/${{ env.ARCH }}/configs/${{ env.KERNEL_CONFIG }} || echo "⚠️ 开启 CONFIG_KPROBES 失败"
-      #     echo "CONFIG_HAVE_KPROBES=y" >> arch/${{ env.ARCH }}/configs/${{ env.KERNEL_CONFIG }} || echo "⚠️ 开启 CONFIG_HAVE_KPROBES 失败"
-      #     echo "CONFIG_KPROBE_EVENTS=y" >> arch/${{ env.ARCH }}/configs/${{ env.KERNEL_CONFIG }} || echo "⚠️ 开启 CONFIG_KPROBE_EVENTS 失败"
-      # else
-      #     echo "CONFIG_MODULES=n" >> arch/${{ env.ARCH }}/configs/${{ env.KERNEL_CONFIG }} || echo "⚠️ 关闭 MODULES 失败"
-      #     echo "CONFIG_KPROBES=n" >> arch/${{ env.ARCH }}/configs/${{ env.KERNEL_CONFIG }} || echo "⚠️ 关闭 CONFIG_KPROBES 失败"
-      #     echo "CONFIG_HAVE_KPROBES=n" >> arch/${{ env.ARCH }}/configs/${{ env.KERNEL_CONFIG }} || echo "⚠️ 关闭 CONFIG_HAVE_KPROBES 失败"
-      #     echo "CONFIG_KPROBE_EVENTS=n" >> arch/${{ env.ARCH }}/configs/${{ env.KERNEL_CONFIG }} || echo "⚠️ 关闭 CONFIG_KPROBE_EVENTS 失败"
-      # fi
-      # echo "⚠️ 配置目录 $(pwd)"
-      # if [ ${{ env.ADD_OVERLAYFS_CONFIG }} == 'true' ]; then
-      #     echo "CONFIG_OVERLAY_FS=y" >> arch/${{ env.ARCH }}/configs/${{ env.KERNEL_CONFIG }} || echo "⚠️ 开启 CONFIG_OVERLAY_FS 失败"
-      # else
-      #     echo "CONFIG_OVERLAY_FS=n" >> arch/${{ env.ARCH }}/configs/${{ env.KERNEL_CONFIG }} || echo "⚠️ 关闭 CONFIG_OVERLAY_FS 失败"
-      # fi
-      # echo "⚠️ 配置目录 $(pwd)"
-      # if [ ${{ env.DISABLE_LTO }} == 'true' ]; then
-      #     sed -i 's/CONFIG_LTO=y/CONFIG_LTO=n/' arch/${{ env.ARCH }}/configs/${{ env.KERNEL_CONFIG }}
-      #     sed -i 's/CONFIG_LTO_CLANG=y/CONFIG_LTO_CLANG=n/' arch/${{ env.ARCH }}/configs/${{ env.KERNEL_CONFIG }}
-      #     sed -i 's/CONFIG_THINLTO=y/CONFIG_THINLTO=n/' arch/${{ env.ARCH }}/configs/${{ env.KERNEL_CONFIG }}
-      #     echo "CONFIG_LTO_NONE=y" >> arch/${{ env.ARCH }}/configs/${{ env.KERNEL_CONFIG }} || echo "⚠️ 开启 LTO 优化失败"
-      # else
-      #     sed -i 's/CONFIG_LTO=y/CONFIG_LTO=n/' arch/${{ env.ARCH }}/configs/${{ env.KERNEL_CONFIG }}
-      #     sed -i 's/CONFIG_LTO_CLANG=y/CONFIG_LTO_CLANG=n/' arch/${{ env.ARCH }}/configs/${{ env.KERNEL_CONFIG }}
-      #     sed -i 's/CONFIG_THINLTO=y/CONFIG_THINLTO=n/' arch/${{ env.ARCH }}/configs/${{ env.KERNEL_CONFIG }}
-      #     echo "CONFIG_LTO_NONE=n" >> arch/${{ env.ARCH }}/configs/${{ env.KERNEL_CONFIG }} || echo "⚠️ 关闭 LTO 优化失败"
-      # fi
-      # echo "⚠️ 配置目录 $(pwd)"
-      # if [ ${{ env.DISABLE_CC_WERROR }} == 'true' ]; then
-      #     echo "CONFIG_CC_WERROR=n" >> arch/${{ env.ARCH }}/configs/${{ env.KERNEL_CONFIG }} || echo "⚠️ 关闭错误警告失败"
-      # else
-      #     echo "CONFIG_CC_WERROR=y" >> arch/${{ env.ARCH }}/configs/${{ env.KERNEL_CONFIG }} || echo "⚠️ 开启错误警告失败"
-      # fi
-      # echo "⚠️ 配置目录 $(pwd)"
-      # if [ ${{ env.LLVM_CONFIG }} == 'true' ]; then
+        if [ ${{ env.DISABLE_CC_WERROR }} = true ]; then
+            echo "CONFIG_CC_WERROR=n" >> arch/${{ env.ARCH }}/configs/${{ env.KERNEL_CONFIG }} || echo "⚠️ 关闭错误警告失败"
+        else
+            echo "CONFIG_CC_WERROR=y" >> arch/${{ env.ARCH }}/configs/${{ env.KERNEL_CONFIG }} || echo "⚠️ 开启错误警告失败"
+        fi
+        echo "⚠️ 配置目录 $(pwd)"
+      # if [ ${{ env.LLVM_CONFIG }} = true ]; then
       #     LLVM_PARAMS="LLVM=1 LLVM_IAS=1 AR=llvm-ar NM=llvm-nm OBJCOPY=llvm-objcopy OBJDUMP=llvm-objdump STRIP=llvm-strip"
       #     echo "LLVM_PARAMS=$LLVM_PARAMS" >> $GITHUB_ENV || echo "⚠️ 写入 LLVM_PARAMS 失败"
       # fi
       # echo "⚠️ 配置目录 $(pwd)"
-      # if [ ${{ env.USE_VERSION_PARAMS_CONFIG }} == 'false' ]; then
+      # if [ ${{ env.USE_VERSION_PARAMS_CONFIG }} = false ]; then
       #     ANDROID_VER_INT=$(echo ${{ env.ANDROID_VERSION }} | awk '{print int($0)}')
       #     if [ ANDROID_VER_INT -eq 10 ] || [ $ANDROID_VER_INT -eq 11 ]; then
       #         VERSION_PARAMS="KBUILD_CFLAGS+=-Wno-error=deprecated-declarations KBUILD_CFLAGS+=-Wno-error=unused-const-variable"
@@ -408,7 +374,7 @@ jobs:
       #     echo "VERSION_PARAMS=$VERSION_PARAMS" >> $GITHUB_ENV || echo "⚠️ 写入 VERSION_PARAMS 失败"
       # fi
       # echo "⚠️ 配置目录 $(pwd)"
-      # if [ ${{ env.ENABLE_KVM }} == 'true' ]; then
+      # if [ ${{ env.ENABLE_KVM }} = true ]; then
       #     echo "CONFIG_KVM=y" >> arch/${{ env.ARCH }}/configs/${{ env.KERNEL_CONFIG }} || echo "⚠️ 开启 CONFIG_KVM 失败"
       #     echo "CONFIG_KVM_ARM64=y" >> arch/${{ env.ARCH }}/configs/${{ env.KERNEL_CONFIG }} || echo "⚠️ 开启 CONFIG_KVM_ARM64 失败"
       # else
@@ -417,7 +383,7 @@ jobs:
       #     echo "CONFIG_KVM=n" >> arch/${{ env.ARCH }}/configs/${{ env.KERNEL_CONFIG }} || echo "⚠️ 关闭 CONFIG_KVM 失败"
       # fi
       # echo "⚠️ 配置目录 $(pwd)"
-      # if [ ${{ env.SWITCH_PYTHON }} == 'true' ]; then
+      # if [ ${{ env.SWITCH_PYTHON }} = true ]; then
       #     update-alternatives --set python /usr/bin/python2 2>/dev/null
       #     export PYTHON=/usr/bin/python2
       # else
@@ -445,7 +411,7 @@ jobs:
         
         make -j$(nproc --all) CC=clang O=out ARCH=${{ env.ARCH }} ${{ env.CUSTOM_CMDS }} ${{ env.EXTRA_CMDS }} ${{ env.GCC_64 }} ${{ env.GCC_32 }} ${{ env.KERNEL_CONFIG }} ${{ env.LLVM_PARAMS }} KCFLAGS="-w -Wno-error=all ${{ env.VERSION_PARAMS }}" KBUILD_CFLAGS="-w -Wno-error=all ${{ env.VERSION_PARAMS }}"
         
-        if [ ${{ env.ENABLE_CCACHE }} == 'true' ]; then
+        if [ ${{ env.ENABLE_CCACHE }} = true ]; then
             make -j$(nproc --all) CC="ccache clang" O=out ARCH=${{ env.ARCH }} ${{ env.CUSTOM_CMDS }} ${{ env.EXTRA_CMDS }} ${{ env.GCC_64 }} ${{ env.GCC_32 }} ${{ env.LLVM_PARAMS }} KCFLAGS="-w -Wno-error=all ${{ env.VERSION_PARAMS }}" KBUILD_CFLAGS="-w -Wno-error=all ${{ env.VERSION_PARAMS }}"
         else
             make -j$(nproc --all) CC=clang O=out ARCH=${{ env.ARCH }} ${{ env.CUSTOM_CMDS }} ${{ env.EXTRA_CMDS }} ${{ env.GCC_64 }} ${{ env.GCC_32 }} ${{ env.LLVM_PARAMS }} KCFLAGS="-w -Wno-error=all ${{ env.VERSION_PARAMS }}" KBUILD_CFLAGS="-w -Wno-error=all ${{ env.VERSION_PARAMS }}"
@@ -460,7 +426,7 @@ jobs:
            echo "Kernel output file is empty"
            exit 1
        fi
-       if [ ${{ env.NEED_DTBO }} == 'true' ]; then
+       if [ ${{ env.NEED_DTBO }} = true ]; then
            if [ -f android-kernel/out/arch/${{ env.ARCH }}/boot/dtbo.img ]; then
                echo "CHECK_DTBO_IS_OK=true" >> $GITHUB_ENV
            else
@@ -470,7 +436,7 @@ jobs:
        fi
 
     - name: Make Anykernel3
-      if: env.CHECK_FILE_IS_OK == 'true' && env.USE_CUSTOM_ANYKERNEL3 != 'true'
+      if: env.CHECK_FILE_IS_OK = true && env.USE_CUSTOM_ANYKERNEL3 != 'true'
       run: |
         cd $GITHUB_WORKSPACE/kernel_workspace
         git clone https://github.com/osm0sis/AnyKernel3 --depth=1 AnyKernel3
@@ -478,13 +444,13 @@ jobs:
         sed -i 's!BLOCK=/dev/block/platform/omap/omap_hsmmc.0/by-name/boot;!BLOCK=auto;!g' AnyKernel3/anykernel.sh
         sed -i 's/IS_SLOT_DEVICE=0;/is_slot_device=auto;/g' AnyKernel3/anykernel.sh
         cp android-kernel/out/arch/${{ env.ARCH }}/boot/${{ env.KERNEL_IMAGE_NAME }} AnyKernel3/
-        if [ ${{ env.CHECK_DTBO_IS_OK }} == 'true' ]; then
+        if [ ${{ env.CHECK_DTBO_IS_OK }} = true ]; then
             cp android-kernel/out/arch/${{ env.ARCH }}/boot/dtbo.img AnyKernel3/
         fi
         rm -rf AnyKernel3/.git* AnyKernel3/README.md
 
     - name: Make Custom-Anykernel3
-      if: env.CHECK_FILE_IS_OK == 'true' && env.USE_CUSTOM_ANYKERNEL3 == 'true'
+      if: env.CHECK_FILE_IS_OK = true && env.USE_CUSTOM_ANYKERNEL3 == 'true'
       run: |
         cd $GITHUB_WORKSPACE/kernel_workspace
         if [[ ${{ env.CUSTOM_ANYKERNEL3_SOURCE }} =~ git ]]; then
@@ -501,13 +467,13 @@ jobs:
             unzip AnyKernel3.zip -d AnyKernel3/
         fi
         cp android-kernel/out/arch/${{ env.ARCH }}/boot/${{ env.KERNEL_IMAGE_NAME }} AnyKernel3/
-        if [ ${{ env.CHECK_DTBO_IS_OK }} == 'true' ]; then
+        if [ ${{ env.CHECK_DTBO_IS_OK }} = true ]; then
             cp android-kernel/out/arch/${{ env.ARCH }}/boot/dtbo.img AnyKernel3/
         fi
         rm -rf AnyKernel3/.git* AnyKernel3/README.md
 
     - name: Make boot image
-      if: env.HAVE_SOURCE_BOOT_IMAGE == 'true' && env.CHECK_FILE_IS_OK == 'true'
+      if: env.HAVE_SOURCE_BOOT_IMAGE = true && env.CHECK_FILE_IS_OK == 'true'
       run: |
         cd $GITHUB_WORKSPACE/kernel_workspace
         tools/unpack_bootimg.py --boot_img boot-source.img
