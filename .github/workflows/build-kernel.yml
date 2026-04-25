@@ -384,13 +384,13 @@ jobs:
             echo "CONFIG_KVM=n" >> arch/${{ env.ARCH }}/configs/${{ env.KERNEL_CONFIG }} || echo "⚠️ 关闭 CONFIG_KVM 失败"
         fi
         echo "⚠️ ENABLE_KVM 已执行"
-        if [ ${{ env.SWITCH_PYTHON }} = true ]; then
-            update-alternatives --set python /usr/bin/python2 2>/dev/null
-            export PYTHON=/usr/bin/python2
-        else
-            update-alternatives --set python /usr/bin/python3 2>/dev/null
-            export PYTHON=/usr/bin/python3
-        fi
+      # if [ ${{ env.SWITCH_PYTHON }} = true ]; then
+      #     update-alternatives --set python /usr/bin/python2 2>/dev/null
+      #     export PYTHON=/usr/bin/python2
+      # else
+      #     update-alternatives --set python /usr/bin/python3 2>/dev/null
+      #     export PYTHON=/usr/bin/python3
+      # fi
 
     - name: Setup ccache
       if: env.ENABLE_CCACHE == 'true'
