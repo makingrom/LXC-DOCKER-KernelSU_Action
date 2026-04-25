@@ -50,6 +50,8 @@ jobs:
             CUSTOM_ANYKERNEL3_SOURCE
             CUSTOM_ANYKERNEL3_BRANCH
             DISABLE_STACK_PROTECTOR
+            PLATFORM_QUALCOMM
+            PLATFORM_MEDIATEK
             SWITCH_PYTHON
             DISABLE_LTO
             DISABLE_CC_WERROR
@@ -385,14 +387,40 @@ jobs:
             echo "CONFIG_KVM=n" >> arch/${{ env.ARCH }}/configs/${{ env.KERNEL_CONFIG }} || echo "⚠️ 关闭 CONFIG_KVM 失败"
         fi
         echo "⚠️ ENABLE_KVM 已执行"
-        if [ ${{ env.ENABLE_KVM }} = true ]; then
+        if [ ${{ env.DISABLE_STACK_PROTECTOR }} = true ]; then
             echo "🔍 禁用栈保护配置（适配 Clang 兼容性）"
             sed -i 's/CONFIG_CC_STACKPROTECTOR_STRONG=y/# CONFIG_CC_STACKPROTECTOR_STRONG is not set/g' arch/${{ env.ARCH }}/configs/${{ env.KERNEL_CONFIG }}
             sed -i 's/CONFIG_CC_STACKPROTECTOR=y/# CONFIG_CC_STACKPROTECTOR is not set/g' arch/${{ env.ARCH }}/configs/${{ env.KERNEL_CONFIG }}
-            sed -i 's/CONFIG_MTK_NFC_CLKBUF_ENABLE=y/CONFIG_MTK_NFC_CLKBUF_ENABLE=m/g' arch/${{ env.ARCH }}/configs/${{ env.KERNEL_CONFIG }} 2>/dev/null
             echo "✅ 栈保护配置修复完成"
         else
             echo "🔍 保留默认栈保护配置"
+        fi
+        if [ ${{ env.PLATFORM_QUALCOMM }} = true ]; then
+            echo "✅ 启用 【骁龙平台】 专属配置"
+            sed -i 's/CONFIG_MTK_.*=y//g' arch/${{ env.ARCH }}/configs/${{ env.KERNEL_CONFIG }} 2>/dev/null
+            sed -i '/CONFIG_MTK_/d' arch/${{ env.ARCH }}/configs/${{ env.KERNEL_CONFIG }} 2>/dev/null
+            echo "CONFIG_QCOM_SCM=y" >> arch/${{ env.ARCH }}/configs/${{ env.KERNEL_CONFIG }} || echo "⚠️ 写入 CONFIG_QCOM_SCM 失败"
+            echo "CONFIG_QCOM_CLK=y" >> arch/${{ env.ARCH }}/configs/${{ env.KERNEL_CONFIG }} || echo "⚠️ 写入 CONFIG_QCOM_CLK 失败"
+            echo "CONFIG_QCOM_SPMI=y" >> arch/${{ env.ARCH }}/configs/${{ env.KERNEL_CONFIG }} || echo "⚠️ 写入 CONFIG_QCOM_SPMI 失败"
+            echo "CONFIG_MSM_SLEEP=y" >> arch/${{ env.ARCH }}/configs/${{ env.KERNEL_CONFIG }} || echo "⚠️ 写入 CONFIG_MSM_SLEEP 失败"
+            echo "CONFIG_QCOM_RTP=y" >> arch/${{ env.ARCH }}/configs/${{ env.KERNEL_CONFIG }} || echo "⚠️ 写入 CONFIG_QCOM_RTP 失败"
+            echo "CONFIG_QCOM_SPSS=y" >> arch/${{ env.ARCH }}/configs/${{ env.KERNEL_CONFIG }} || echo "⚠️ 写入 CONFIG_QCOM_SPSS 失败"
+            echo "CONFIG_QCOM_CLK_V2=y" >> arch/${{ env.ARCH }}/configs/${{ env.KERNEL_CONFIG }} || echo "⚠️ 写入 CONFIG_QCOM_CLK_V2 失败"
+        fi
+        if [ "${{ env.PLATFORM_MEDIATEK }}" = "true" ]; then
+            echo "✅ 启用 【联发科平台】 专属配置"
+            sed -i 's/CONFIG_QCOM_.*=y//g' arch/${{ env.ARCH }}/configs/${{ env.KERNEL_CONFIG }} 2>/dev/null
+            sed -i '/CONFIG_QCOM_/d' arch/${{ env.ARCH }}/configs/${{ env.KERNEL_CONFIG }} 2>/dev/null
+            echo "CONFIG_MTK_EMI=y" >> arch/${{ env.ARCH }}/configs/${{ env.KERNEL_CONFIG }} || echo "⚠️ 写入 CONFIG_MTK_EMI 失败"
+            echo "CONFIG_MTK_PMIC=y" >> arch/${{ env.ARCH }}/configs/${{ env.KERNEL_CONFIG }} || echo "⚠️ 写入 CONFIG_MTK_PMIC 失败"
+            echo "CONFIG_MTK_CLKMGR=y" >> arch/${{ env.ARCH }}/configs/${{ env.KERNEL_CONFIG }} || echo "⚠️ 写入 CONFIG_MTK_CLKMGR 失败"
+            echo "CONFIG_MTK_COMBO=y" >> arch/${{ env.ARCH }}/configs/${{ env.KERNEL_CONFIG }} || echo "⚠️ 写入 CONFIG_MTK_COMBO 失败"
+            echo "CONFIG_MTK_NFC_SUPPORT=y" >> arch/${{ env.ARCH }}/configs/${{ env.KERNEL_CONFIG }} || echo "⚠️ 写入 CONFIG_MTK_NFC_SUPPORT 失败"
+            echo "CONFIG_MTK_DRV=y" >> arch/${{ env.ARCH }}/configs/${{ env.KERNEL_CONFIG }} || echo "⚠️ 写入 CONFIG_MTK_DRV 失败"
+            echo "CONFIG_MTK_BOOT=y" >> arch/${{ env.ARCH }}/configs/${{ env.KERNEL_CONFIG }} || echo "⚠️ 写入 CONFIG_MTK_BOOT 失败"
+            echo "CONFIG_MTK_FB=y" >> arch/${{ env.ARCH }}/configs/${{ env.KERNEL_CONFIG }} || echo "⚠️ 写入 CONFIG_MTK_FB 失败"
+            echo "CONFIG_MTK_GPU=y" >> arch/${{ env.ARCH }}/configs/${{ env.KERNEL_CONFIG }} || echo "⚠️ 写入 CONFIG_MTK_GPU 失败"
+            sed -i 's/CONFIG_MTK_NFC_CLKBUF_ENABLE=y/CONFIG_MTK_NFC_CLKBUF_ENABLE=m/g' arch/${{ env.ARCH }}/configs/${{ env.KERNEL_CONFIG }} 2>/dev/null
         fi
       # if [ ${{ env.SWITCH_PYTHON }} = true ]; then
       #     update-alternatives --set python /usr/bin/python2 2>/dev/null
