@@ -385,7 +385,7 @@ jobs:
             echo "CONFIG_KVM=n" >> arch/${{ env.ARCH }}/configs/${{ env.KERNEL_CONFIG }} || echo "⚠️ 关闭 CONFIG_KVM 失败"
         fi
         echo "⚠️ ENABLE_KVM 已执行"
-        if [ ${{ env.DISABLE_STACK_PROTECTOR }} = true ]; then
+        if [ ${{ env.ENABLE_KVM }} = true ]; then
             echo "🔍 禁用栈保护配置（适配 Clang 兼容性）"
             sed -i 's/CONFIG_CC_STACKPROTECTOR_STRONG=y/# CONFIG_CC_STACKPROTECTOR_STRONG is not set/g' arch/${{ env.ARCH }}/configs/${{ env.KERNEL_CONFIG }}
             sed -i 's/CONFIG_CC_STACKPROTECTOR=y/# CONFIG_CC_STACKPROTECTOR is not set/g' arch/${{ env.ARCH }}/configs/${{ env.KERNEL_CONFIG }}
