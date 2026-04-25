@@ -49,6 +49,7 @@ jobs:
             USE_CUSTOM_ANYKERNEL3
             CUSTOM_ANYKERNEL3_SOURCE
             CUSTOM_ANYKERNEL3_BRANCH
+            DISABLE_STACK_PROTECTOR
             SWITCH_PYTHON
             DISABLE_LTO
             DISABLE_CC_WERROR
@@ -384,6 +385,15 @@ jobs:
             echo "CONFIG_KVM=n" >> arch/${{ env.ARCH }}/configs/${{ env.KERNEL_CONFIG }} || echo "⚠️ 关闭 CONFIG_KVM 失败"
         fi
         echo "⚠️ ENABLE_KVM 已执行"
+        if [ ${{ env.DISABLE_STACK_PROTECTOR }} = true ]; then
+            echo "🔍 禁用栈保护配置（适配 Clang 兼容性）"
+            sed -i 's/CONFIG_CC_STACKPROTECTOR_STRONG=y/# CONFIG_CC_STACKPROTECTOR_STRONG is not set/g' arch/${{ env.ARCH }}/configs/${{ env.KERNEL_CONFIG }}
+            sed -i 's/CONFIG_CC_STACKPROTECTOR=y/# CONFIG_CC_STACKPROTECTOR is not set/g' arch/${{ env.ARCH }}/configs/${{ env.KERNEL_CONFIG }}
+            sed -i 's/CONFIG_MTK_NFC_CLKBUF_ENABLE=y/CONFIG_MTK_NFC_CLKBUF_ENABLE=m/g' arch/${{ env.ARCH }}/configs/${{ env.KERNEL_CONFIG }} 2>/dev/null
+            echo "✅ 栈保护配置修复完成"
+        else
+            echo "🔍 保留默认栈保护配置"
+        fi
       # if [ ${{ env.SWITCH_PYTHON }} = true ]; then
       #     update-alternatives --set python /usr/bin/python2 2>/dev/null
       #     export PYTHON=/usr/bin/python2
