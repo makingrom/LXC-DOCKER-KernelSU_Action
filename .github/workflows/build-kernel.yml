@@ -462,19 +462,14 @@ jobs:
         [ -n "$KERNEL_CFG" ] && PARAMS="$PARAMS $KERNEL_CFG"
         
         echo "🔧 最终编译参数：$PARAMS"
-
-        make -j$(nproc --all) CC=clang O=out ARCH=${{ env.ARCH }} $PARAMS
-        if [ "${{ env.ENABLE_CCACHE }}" = "true" ]; then
-            make -j$(nproc --all) CC="ccache clang" O=out ARCH=${{ env.ARCH }} -j$(nproc --all) Image.gz 2>&1 | tee build.log
+        
+        make -j$(nproc --all) CC=clang O=out ARCH=${{ env.ARCH }} ${{ env.CUSTOM_CMDS }} ${{ env.EXTRA_CMDS }} ${{ env.GCC_64 }} ${{ env.GCC_32 }} ${{ env.KERNEL_CONFIG }}
+        if [ ${{ env.ENABLE_CCACHE }} = true ]; then
+            make -j$(nproc --all) CC="ccache clang" O=out ARCH=${{ env.ARCH }} ${{ env.CUSTOM_CMDS }} ${{ env.EXTRA_CMDS }} ${{ env.GCC_64 }} ${{ env.GCC_32 }}
         else
-            make -j$(nproc --all) CC=clang O=out ARCH=${{ env.ARCH }} -j$(nproc --all) Image.gz 2>&1 | tee build.log
+            make -j$(nproc --all) CC=clang O=out ARCH=${{ env.ARCH }} ${{ env.CUSTOM_CMDS }} ${{ env.EXTRA_CMDS }} ${{ env.GCC_64 }} ${{ env.GCC_32 }}
         fi
 
-        ls -la out/arch/${{ env.ARCH }}/boot/ || {
-            echo "❌ 编译失败：未生成内核镜像文件"
-            cat build.log  # 打印编译日志，方便排查
-            exit 1
-        }
       # make -j$(nproc --all) CC=clang O=out ARCH=${{ env.ARCH }} ${{ env.CUSTOM_CMDS }} ${{ env.EXTRA_CMDS }} ${{ env.GCC_64 }} ${{ env.GCC_32 }} ${{ env.KERNEL_CONFIG }}
       # if [ ${{ env.ENABLE_CCACHE }} = true ]; then
       #     make -j$(nproc --all) CC="ccache clang" O=out ARCH=${{ env.ARCH }} ${{ env.CUSTOM_CMDS }} ${{ env.EXTRA_CMDS }} ${{ env.GCC_64 }} ${{ env.GCC_32 }}
