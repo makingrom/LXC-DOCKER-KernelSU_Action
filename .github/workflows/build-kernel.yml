@@ -384,13 +384,13 @@ jobs:
             echo "CONFIG_KVM=n" >> arch/${{ env.ARCH }}/configs/${{ env.KERNEL_CONFIG }} || echo "⚠️ 关闭 CONFIG_KVM 失败"
         fi
         echo "⚠️ ENABLE_KVM 已执行"
-      # if [ ${{ env.SWITCH_PYTHON }} = true ]; then
-      #     update-alternatives --set python /usr/bin/python2 2>/dev/null
-      #     export PYTHON=/usr/bin/python2
-      # else
-      #     update-alternatives --set python /usr/bin/python3 2>/dev/null
-      #     export PYTHON=/usr/bin/python3
-      # fi
+        if [ ${{ env.SWITCH_PYTHON }} = true ]; then
+            update-alternatives --set python /usr/bin/python2 2>/dev/null
+            export PYTHON=/usr/bin/python2
+        else
+            update-alternatives --set python /usr/bin/python3 2>/dev/null
+            export PYTHON=/usr/bin/python3
+        fi
 
     - name: Setup ccache
       if: env.ENABLE_CCACHE == 'true'
@@ -410,13 +410,18 @@ jobs:
           export KSU_EXPECTED_HASH=${{ env.KSU_EXPECTED_HASH }}
         fi
         
-        make -j$(nproc --all) CC=clang O=out ARCH=${{ env.ARCH }} ${{ env.CUSTOM_CMDS }} ${{ env.EXTRA_CMDS }} ${{ env.GCC_64 }} ${{ env.GCC_32 }} ${{ env.KERNEL_CONFIG }} ${{ env.LLVM_PARAMS }} KCFLAGS="-w -Wno-error=all ${{ env.VERSION_PARAMS }}" KBUILD_CFLAGS="-w -Wno-error=all ${{ env.VERSION_PARAMS }}"
-        
+        make -j$(nproc --all) CC=clang O=out ARCH=${{ env.ARCH }} ${{ env.CUSTOM_CMDS }} ${{ env.EXTRA_CMDS }} ${{ env.GCC_64 }} ${{ env.GCC_32 }} ${{ env.KERNEL_CONFIG }}
         if [ ${{ env.ENABLE_CCACHE }} = true ]; then
-            make -j$(nproc --all) CC="ccache clang" O=out ARCH=${{ env.ARCH }} ${{ env.CUSTOM_CMDS }} ${{ env.EXTRA_CMDS }} ${{ env.GCC_64 }} ${{ env.GCC_32 }} ${{ env.LLVM_PARAMS }} KCFLAGS="-w -Wno-error=all ${{ env.VERSION_PARAMS }}" KBUILD_CFLAGS="-w -Wno-error=all ${{ env.VERSION_PARAMS }}"
+            make -j$(nproc --all) CC="ccache clang" O=out ARCH=${{ env.ARCH }} ${{ env.CUSTOM_CMDS }} ${{ env.EXTRA_CMDS }} ${{ env.GCC_64 }} ${{ env.GCC_32 }}
         else
-            make -j$(nproc --all) CC=clang O=out ARCH=${{ env.ARCH }} ${{ env.CUSTOM_CMDS }} ${{ env.EXTRA_CMDS }} ${{ env.GCC_64 }} ${{ env.GCC_32 }} ${{ env.LLVM_PARAMS }} KCFLAGS="-w -Wno-error=all ${{ env.VERSION_PARAMS }}" KBUILD_CFLAGS="-w -Wno-error=all ${{ env.VERSION_PARAMS }}"
+            make -j$(nproc --all) CC=clang O=out ARCH=${{ env.ARCH }} ${{ env.CUSTOM_CMDS }} ${{ env.EXTRA_CMDS }} ${{ env.GCC_64 }} ${{ env.GCC_32 }}
         fi
+      # make -j$(nproc --all) CC=clang O=out ARCH=${{ env.ARCH }} ${{ env.CUSTOM_CMDS }} ${{ env.EXTRA_CMDS }} ${{ env.GCC_64 }} ${{ env.GCC_32 }} ${{ env.KERNEL_CONFIG }} ${{ env.LLVM_PARAMS }} KCFLAGS="-w -Wno-error=all ${{ env.VERSION_PARAMS }}" KBUILD_CFLAGS="-w -Wno-error=all ${{ env.VERSION_PARAMS }}"
+      # if [ ${{ env.ENABLE_CCACHE }} = true ]; then
+          # make -j$(nproc --all) CC="ccache clang" O=out ARCH=${{ env.ARCH }} ${{ env.CUSTOM_CMDS }} ${{ env.EXTRA_CMDS }} ${{ env.GCC_64 }} ${{ env.GCC_32 }} ${{ env.LLVM_PARAMS }} KCFLAGS="-w -Wno-error=all ${{ env.VERSION_PARAMS }}" KBUILD_CFLAGS="-w -Wno-error=all ${{ env.VERSION_PARAMS }}"
+      # else
+          # make -j$(nproc --all) CC=clang O=out ARCH=${{ env.ARCH }} ${{ env.CUSTOM_CMDS }} ${{ env.EXTRA_CMDS }} ${{ env.GCC_64 }} ${{ env.GCC_32 }} ${{ env.LLVM_PARAMS }} KCFLAGS="-w -Wno-error=all ${{ env.VERSION_PARAMS }}" KBUILD_CFLAGS="-w -Wno-error=all ${{ env.VERSION_PARAMS }}"
+      # fi
 
     - name: Check a kernel output files
       run: |
