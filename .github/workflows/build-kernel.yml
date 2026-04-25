@@ -289,7 +289,7 @@ jobs:
       run: |
         echo "当前目录：$(pwd)"
         cd $GITHUB_WORKSPACE/kernel_workspace/android-kernel
-        if [ ${{ env.APPLY_KSU_PATCH }} == 'true' ]; then
+        if [ ${{ env.APPLY_KSU_PATCH }} == 'false' ]; then
             echo "当前目录：$(pwd)"
             if [ -f "$GITHUB_WORKSPACE/patches/patches.sh" ]; then
                 echo "当前目录：$(pwd)"
@@ -358,16 +358,22 @@ jobs:
             ANDROID_VER_INT=$(echo ${{ env.ANDROID_VERSION }} | awk '{print int($0)}')
             if [ ANDROID_VER_INT -eq 10 ] || [ $ANDROID_VER_INT -eq 11 ]; then
                 VERSION_PARAMS="KBUILD_CFLAGS+=-Wno-error=deprecated-declarations KBUILD_CFLAGS+=-Wno-error=unused-const-variable"
+                echo "ANDROID_VERSION=$ANDROID_VERSION" >> $GITHUB_ENV || echo "⚠️ 写入 ANDROID_VERSION 失败"
             elif [ ${{ env.ANDROID_VERSION }} -ge 12 ]; then
                 VERSION_PARAMS="KBUILD_CFLAGS+=-Wno-error=unused-but-set-variable KBUILD_CFLAGS+=-Wno-error=incompatible-pointer-types"
+                echo "ANDROID_VERSION=$ANDROID_VERSION" >> $GITHUB_ENV || echo "⚠️ 写入 ANDROID_VERSION 失败"
             fi
             KERNEL_VER_MAJOR=$(echo ${{ env.KERNEL_VERSION }} | cut -d. -f1 | awk '{print int($0)}')
+            echo "KERNEL_VER_MAJOR=$KERNEL_VER_MAJOR" >> $GITHUB_ENV || echo "⚠️ 写入 KERNEL_VER_MAJOR 失败"
             KERNEL_VER_MINOR=$(echo ${{ env.KERNEL_VERSION }} | cut -d. -f2 | awk '{print int($0)}')
+            echo "KERNEL_VER_MINOR=$KERNEL_VER_MINOR" >> $GITHUB_ENV || echo "⚠️ 写入 KERNEL_VER_MINOR 失败"
             if [ $KERNEL_VER_MAJOR -ge 5 ] || [ $KERNEL_VER_MINOR -ge 10 ]; then
                 if [ -n "$VERSION_PARAMS" ]; then
                     VERSION_PARAMS="$VERSION_PARAMS CONFIG_LTO_CLANG=y"
+                    echo "VERSION_PARAMS=$VERSION_PARAMS" >> $GITHUB_ENV || echo "⚠️ 写入 VERSION_PARAMS 失败"
                 else
                     VERSION_PARAMS="CONFIG_LTO_CLANG=y"
+                    echo "VERSION_PARAMS=$VERSION_PARAMS" >> $GITHUB_ENV || echo "⚠️ 写入 VERSION_PARAMS 失败"
                 fi
             fi
             echo "VERSION_PARAMS=$VERSION_PARAMS" >> $GITHUB_ENV || echo "⚠️ 写入 VERSION_PARAMS 失败"
