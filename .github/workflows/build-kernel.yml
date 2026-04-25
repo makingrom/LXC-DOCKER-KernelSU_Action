@@ -312,11 +312,11 @@ jobs:
                 echo "CONFIG_KSU=n" >> arch/${{ env.ARCH }}/configs/${{ env.KERNEL_CONFIG }}
             fi
         else
-            echo "🔍 配置文件完整路径：$FULL_CONFIG_FILE"
+            echo "🔍 配置文件完整路径：$GITHUB_WORKSPACE/kernel_workspace/android-kernel/arch/${{ env.ARCH }}/configs/${{ env.KERNEL_CONFIG }}"
             echo "🔍 检查文件是否存在："
-            ls -la "$FULL_CONFIG_FILE" 2>&1 || echo "❌ 文件不存在！"
+            ls -la "$GITHUB_WORKSPACE/kernel_workspace/android-kernel/arch/${{ env.ARCH }}/configs/${{ env.KERNEL_CONFIG }}" 2>&1 || echo "❌ 文件不存在！"
             echo "🔍 检查目录是否存在："
-            ls -la "$(dirname "$FULL_CONFIG_FILE")" 2>&1 || echo "❌ 目录不存在！"
+            ls -la "$(dirname "$GITHUB_WORKSPACE/kernel_workspace/android-kernel/arch/${{ env.ARCH }}/configs/${{ env.KERNEL_CONFIG }}")" 2>&1 || echo "❌ 目录不存在！"
             echo "⚠️ 配置目录 $GITHUB_WORKSPACE/kernel_workspace/android-kernel/arch/${{ env.ARCH }}/configs/${{ env.KERNEL_CONFIG }} 不存在，跳过 CONFIG_KSU 配置"
         fi
         if [ ${{ env.ADD_KPROBES_CONFIG }} == 'true' -a ${{ env.APPLY_KSU_PATCH }} != 'true' ]; then
