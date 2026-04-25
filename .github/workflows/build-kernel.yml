@@ -448,12 +448,33 @@ jobs:
           export KSU_EXPECTED_HASH=${{ env.KSU_EXPECTED_HASH }}
         fi
         
-        make -j$(nproc --all) CC=clang O=out ARCH=${{ env.ARCH }} ${{ env.CUSTOM_CMDS }} ${{ env.EXTRA_CMDS }} ${{ env.GCC_64 }} ${{ env.GCC_32 }} ${{ env.KERNEL_CONFIG }}
-        if [ ${{ env.ENABLE_CCACHE }} = true ]; then
-            make -j$(nproc --all) CC="ccache clang" O=out ARCH=${{ env.ARCH }} ${{ env.CUSTOM_CMDS }} ${{ env.EXTRA_CMDS }} ${{ env.GCC_64 }} ${{ env.GCC_32 }}
+        CUSTOM_CMDS="${{ env.CUSTOM_CMDS }}"
+        EXTRA_CMDS="${{ env.EXTRA_CMDS }}"
+        GCC64="${{ env.GCC_64 }}"
+        GCC32="${{ env.GCC_32 }}"
+        KERNEL_CFG="${{ env.KERNEL_CONFIG }}"
+        
+        PARAMS=""
+        [ -n "$CUSTOM_CMDS" ] && [ "$CUSTOM_CMDS" != "false" ] && PARAMS="$PARAMS $CUSTOM_CMDS"
+        [ -n "$EXTRA_CMDS" ] && [ "$EXTRA_CMDS" != "false" ] && PARAMS="$PARAMS $EXTRA_CMDS"
+        [ -n "$GCC64" ] && [ "$GCC64" != "false" ] && PARAMS="$PARAMS $GCC64"
+        [ -n "$GCC32" ] && [ "$GCC32" != "false" ] && PARAMS="$PARAMS $GCC32"
+        [ -n "$KERNEL_CFG" ] && PARAMS="$PARAMS $KERNEL_CFG"
+        
+        echo "🔧 最终编译参数：$PARAMS"
+
+        make -j$(nproc --all) CC=clang O=out ARCH=${{ env.ARCH }} $PARAMS
+        if [ "${{ env.ENABLE_CCACHE }}" = "true" ]; then
+            make -j$(nproc --all) CC="ccache clang" O=out ARCH=${{ env.ARCH }} $PARAMS
         else
-            make -j$(nproc --all) CC=clang O=out ARCH=${{ env.ARCH }} ${{ env.CUSTOM_CMDS }} ${{ env.EXTRA_CMDS }} ${{ env.GCC_64 }} ${{ env.GCC_32 }}
+            make -j$(nproc --all) CC=clang O=out ARCH=${{ env.ARCH }} $PARAMS
         fi
+      # make -j$(nproc --all) CC=clang O=out ARCH=${{ env.ARCH }} ${{ env.CUSTOM_CMDS }} ${{ env.EXTRA_CMDS }} ${{ env.GCC_64 }} ${{ env.GCC_32 }} ${{ env.KERNEL_CONFIG }}
+      # if [ ${{ env.ENABLE_CCACHE }} = true ]; then
+      #     make -j$(nproc --all) CC="ccache clang" O=out ARCH=${{ env.ARCH }} ${{ env.CUSTOM_CMDS }} ${{ env.EXTRA_CMDS }} ${{ env.GCC_64 }} ${{ env.GCC_32 }}
+      # else
+      #     make -j$(nproc --all) CC=clang O=out ARCH=${{ env.ARCH }} ${{ env.CUSTOM_CMDS }} ${{ env.EXTRA_CMDS }} ${{ env.GCC_64 }} ${{ env.GCC_32 }}
+      # fi
       # make -j$(nproc --all) CC=clang O=out ARCH=${{ env.ARCH }} ${{ env.CUSTOM_CMDS }} ${{ env.EXTRA_CMDS }} ${{ env.GCC_64 }} ${{ env.GCC_32 }} ${{ env.KERNEL_CONFIG }} ${{ env.LLVM_PARAMS }} KCFLAGS="-w -Wno-error=all ${{ env.VERSION_PARAMS }}" KBUILD_CFLAGS="-w -Wno-error=all ${{ env.VERSION_PARAMS }}"
       # if [ ${{ env.ENABLE_CCACHE }} = true ]; then
           # make -j$(nproc --all) CC="ccache clang" O=out ARCH=${{ env.ARCH }} ${{ env.CUSTOM_CMDS }} ${{ env.EXTRA_CMDS }} ${{ env.GCC_64 }} ${{ env.GCC_32 }} ${{ env.LLVM_PARAMS }} KCFLAGS="-w -Wno-error=all ${{ env.VERSION_PARAMS }}" KBUILD_CFLAGS="-w -Wno-error=all ${{ env.VERSION_PARAMS }}"
