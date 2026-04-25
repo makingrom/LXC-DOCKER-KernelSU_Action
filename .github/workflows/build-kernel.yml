@@ -313,16 +313,20 @@ jobs:
             fi
         else
             echo "⚠️ 配置目录 $(pwd)"
-            if grep -q "CONFIG_KSU" arch/${{ env.ARCH }}/configs/${{ env.KERNEL_CONFIG }}; then
-                echo "🔍 配置文件完整路径：$GITHUB_WORKSPACE/kernel_workspace/android-kernel/arch/${{ env.ARCH }}/configs/${{ env.KERNEL_CONFIG }}"
-                echo "🔍 检查文件是否存在："
-                ls -la "$GITHUB_WORKSPACE/kernel_workspace/android-kernel/arch/${{ env.ARCH }}/configs/${{ env.KERNEL_CONFIG }}" 2>&1 || echo "❌ 文件不存在！"
+            echo "🔍 处理 CONFIG_KSU：$GITHUB_WORKSPACE/kernel_workspace/android-kernel/arch/${{ env.ARCH }}/configs/${{ env.KERNEL_CONFIG }}"
+            if grep -q "CONFIG_KSU" "$GITHUB_WORKSPACE/kernel_workspace/android-kernel/arch/${{ env.ARCH }}/configs/${{ env.KERNEL_CONFIG }}" 2>&1; then
+                echo "✅ 找到 CONFIG_KSU，修改为 y"
+                sed -i 's/# CONFIG_KSU is not set/CONFIG_KSU=y/g' "$GITHUB_WORKSPACE/kernel_workspace/android-kernel/arch/${{ env.ARCH }}/configs/${{ env.KERNEL_CONFIG }}" || echo "⚠️ sed 1 失败"
+                sed -i 's/CONFIG_KSU=n/CONFIG_KSU=y/g' "$GITHUB_WORKSPACE/kernel_workspace/android-kernel/arch/${{ env.ARCH }}/configs/${{ env.KERNEL_CONFIG }}" || echo "⚠️ sed 2 失败"
             else
-                if [ -f "$GITHUB_WORKSPACE/kernel_workspace/android-kernel/arch/${{ env.ARCH }}/configs/${{ env.KERNEL_CONFIG }}" ]; then
-                    echo "⚠️ 文件存在，但未找到 CONFIG_KSU 配置项！"
-                else
-                    echo "❌ grep 失败：文件不存在/无法访问！"
-                fi
+                echo "⚠️ 无 CONFIG_KSU，写入 y（根据你的需求，也可以写 n）"
+                chmod 644 "$GITHUB_WORKSPACE/kernel_workspace/android-kernel/arch/${{ env.ARCH }}/configs/${{ env.KERNEL_CONFIG }}" || echo "⚠️ chmod 失败"
+                sed -i '/CONFIG_KSU=/d' "$GITHUB_WORKSPACE/kernel_workspace/android-kernel/arch/${{ env.ARCH }}/configs/${{ env.KERNEL_CONFIG }}" 2>/dev/null  # 先清旧行
+                echo "CONFIG_KSU=y" >> "$GITHUB_WORKSPACE/kernel_workspace/android-kernel/arch/${{ env.ARCH }}/configs/${{ env.KERNEL_CONFIG }}" || {
+                    echo "❌ 写入 CONFIG_KSU 失败！"
+                    ls -la "$GITHUB_WORKSPACE/kernel_workspace/android-kernel/arch/${{ env.ARCH }}/configs/${{ env.KERNEL_CONFIG }}"
+                    exit 0  # 不终止流程
+                }
             fi
             echo "⚠️ 配置目录 $(pwd)"
             echo "🔍 if grep -q "CONFIG_KSU" arch/${{ env.ARCH }}/configs/${{ env.KERNEL_CONFIG }} 执行失败"
