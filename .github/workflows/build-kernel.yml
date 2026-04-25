@@ -19,9 +19,9 @@ jobs:
             KERNEL_SOURCE
             KERNEL_SOURCE_BRANCH
             KERNEL_CONFIG
-            ANDROID_VERSION
-            ANDROID_VER_INT
-            KERNEL_VERSION
+            # ANDROID_VERSION
+            # ANDROID_VER_INT
+            # KERNEL_VERSION
             KERNEL_IMAGE_NAME
             ARCH
             ADD_LOCALVERSION_TO_FILENAME
@@ -42,17 +42,17 @@ jobs:
             CUSTOM_GCC_32_BRANCH
             CUSTOM_GCC_32_BIN
             ENABLE_KERNELSU
-            KERNELSU_BRANCH
+            # KERNELSU_BRANCH
             KERNELSU_TAG
-            KSU_EXPECTED_SIZE
-            KSU_EXPECTED_HASH
+            # KSU_EXPECTED_SIZE
+            # KSU_EXPECTED_HASH
             USE_CUSTOM_ANYKERNEL3
             CUSTOM_ANYKERNEL3_SOURCE
             CUSTOM_ANYKERNEL3_BRANCH
             DISABLE_STACK_PROTECTOR
-            PLATFORM_QUALCOMM
-            PLATFORM_MEDIATEK
-            SWITCH_PYTHON
+            # PLATFORM_QUALCOMM
+            # PLATFORM_MEDIATEK
+            # SWITCH_PYTHON
             DISABLE_LTO
             DISABLE_CC_WERROR
             ADD_KPROBES_CONFIG
@@ -60,12 +60,12 @@ jobs:
             APPLY_KSU_PATCH
             ENABLE_KVM
             EXTRA_CMDS
-            LLVM_CONFIG
-            LLVM_PARAMS
-            USE_VERSION_PARAMS_CONFIG
-            KERNEL_VER_MAJOR
-            KERNEL_VER_MINOR
-            VERSION_PARAMS
+            # LLVM_CONFIG
+            # LLVM_PARAMS
+            # USE_VERSION_PARAMS_CONFIG
+            # KERNEL_VER_MAJOR
+            # KERNEL_VER_MINOR
+            # VERSION_PARAMS
             REMOVE_UNUSED_PACKAGES
             ENABLE_CCACHE
             NEED_DTBO
@@ -347,81 +347,81 @@ jobs:
             echo "CONFIG_CC_WERROR=y" >> arch/${{ env.ARCH }}/configs/${{ env.KERNEL_CONFIG }} || echo "⚠️ 开启错误警告失败"
         fi
         echo "⚠️ DISABLE_CC_WERROR 已执行"
-        if [ ${{ env.LLVM_CONFIG }} = true ]; then
-            LLVM_PARAMS="LLVM=1 LLVM_IAS=1 AR=llvm-ar NM=llvm-nm OBJCOPY=llvm-objcopy OBJDUMP=llvm-objdump STRIP=llvm-strip"
-            echo "LLVM_PARAMS=$LLVM_PARAMS" >> $GITHUB_ENV || echo "⚠️ 写入 LLVM_PARAMS 失败"
-        fi
-        echo '$LLVM_PARAMS'
-        echo "⚠️ 配置目录 LLVM_CONFIG 已执行 "$LLVM_PARAMS" "
-        if [ ${{ env.USE_VERSION_PARAMS_CONFIG }} = false ]; then
-            ANDROID_VER_INT=$(echo ${{ env.ANDROID_VERSION }} | awk '{print int($0)}')
-            if [ ANDROID_VER_INT -eq 10 ] || [ $ANDROID_VER_INT -eq 11 ]; then
-                VERSION_PARAMS="KBUILD_CFLAGS+=-Wno-error=deprecated-declarations KBUILD_CFLAGS+=-Wno-error=unused-const-variable"
-                echo "ANDROID_VERSION=$ANDROID_VERSION" >> $GITHUB_ENV || echo "⚠️ 写入 ANDROID_VERSION 失败"
-            elif [ ${{ env.ANDROID_VERSION }} -ge 12 ]; then
-                VERSION_PARAMS="KBUILD_CFLAGS+=-Wno-error=unused-but-set-variable KBUILD_CFLAGS+=-Wno-error=incompatible-pointer-types"
-                echo "ANDROID_VERSION=$ANDROID_VERSION" >> $GITHUB_ENV || echo "⚠️ 写入 ANDROID_VERSION 失败"
-            fi
-            KERNEL_VER_MAJOR=$(echo ${{ env.KERNEL_VERSION }} | cut -d. -f1 | awk '{print int($0)}')
-            echo "KERNEL_VER_MAJOR=$KERNEL_VER_MAJOR" >> $GITHUB_ENV || echo "⚠️ 写入 KERNEL_VER_MAJOR 失败"
-            KERNEL_VER_MINOR=$(echo ${{ env.KERNEL_VERSION }} | cut -d. -f2 | awk '{print int($0)}')
-            echo "KERNEL_VER_MINOR=$KERNEL_VER_MINOR" >> $GITHUB_ENV || echo "⚠️ 写入 KERNEL_VER_MINOR 失败"
-            if [ $KERNEL_VER_MAJOR -ge 5 ] || [ $KERNEL_VER_MINOR -ge 10 ]; then
-                if [ -n "$VERSION_PARAMS" ]; then
-                    VERSION_PARAMS="$VERSION_PARAMS CONFIG_LTO_CLANG=y"
-                    echo "VERSION_PARAMS=$VERSION_PARAMS" >> $GITHUB_ENV || echo "⚠️ 写入 VERSION_PARAMS 失败"
-                else
-                    VERSION_PARAMS="CONFIG_LTO_CLANG=y"
-                    echo "VERSION_PARAMS=$VERSION_PARAMS" >> $GITHUB_ENV || echo "⚠️ 写入 VERSION_PARAMS 失败"
-                fi
-            fi
-            echo "VERSION_PARAMS=$VERSION_PARAMS" >> $GITHUB_ENV || echo "⚠️ 写入 VERSION_PARAMS 失败"
-        fi
-        echo "⚠️ USE_VERSION_PARAMS_CONFIG 已执行"
-        if [ ${{ env.ENABLE_KVM }} = true ]; then
-            echo "CONFIG_KVM=y" >> arch/${{ env.ARCH }}/configs/${{ env.KERNEL_CONFIG }} || echo "⚠️ 开启 CONFIG_KVM 失败"
-            echo "CONFIG_KVM_ARM64=y" >> arch/${{ env.ARCH }}/configs/${{ env.KERNEL_CONFIG }} || echo "⚠️ 开启 CONFIG_KVM_ARM64 失败"
-        else
-            sed -i 's/CONFIG_KVM=y/CONFIG_KVM=n/g' arch/${{ env.ARCH }}/configs/${{ env.KERNEL_CONFIG }} 2>/dev/null
-            sed -i 's/CONFIG_KVM_ARM64=y/CONFIG_KVM_ARM64=n/g' arch/${{ env.ARCH }}/configs/${{ env.KERNEL_CONFIG }} 2>/dev/null
-            echo "CONFIG_KVM=n" >> arch/${{ env.ARCH }}/configs/${{ env.KERNEL_CONFIG }} || echo "⚠️ 关闭 CONFIG_KVM 失败"
-        fi
-        echo "⚠️ ENABLE_KVM 已执行"
-        if [ ${{ env.DISABLE_STACK_PROTECTOR }} = true ]; then
-            echo "🔍 禁用栈保护配置（适配 Clang 兼容性）"
-            sed -i 's/CONFIG_CC_STACKPROTECTOR_STRONG=y/# CONFIG_CC_STACKPROTECTOR_STRONG is not set/g' arch/${{ env.ARCH }}/configs/${{ env.KERNEL_CONFIG }}
-            sed -i 's/CONFIG_CC_STACKPROTECTOR=y/# CONFIG_CC_STACKPROTECTOR is not set/g' arch/${{ env.ARCH }}/configs/${{ env.KERNEL_CONFIG }}
-            echo "✅ 栈保护配置修复完成"
-        else
-            echo "🔍 保留默认栈保护配置"
-        fi
-        if [ ${{ env.PLATFORM_QUALCOMM }} = true ]; then
-            echo "✅ 启用 【骁龙平台】 专属配置"
-            sed -i 's/CONFIG_MTK_.*=y//g' arch/${{ env.ARCH }}/configs/${{ env.KERNEL_CONFIG }} 2>/dev/null
-            sed -i '/CONFIG_MTK_/d' arch/${{ env.ARCH }}/configs/${{ env.KERNEL_CONFIG }} 2>/dev/null
-            echo "CONFIG_QCOM_SCM=y" >> arch/${{ env.ARCH }}/configs/${{ env.KERNEL_CONFIG }} || echo "⚠️ 写入 CONFIG_QCOM_SCM 失败"
-            echo "CONFIG_QCOM_CLK=y" >> arch/${{ env.ARCH }}/configs/${{ env.KERNEL_CONFIG }} || echo "⚠️ 写入 CONFIG_QCOM_CLK 失败"
-            echo "CONFIG_QCOM_SPMI=y" >> arch/${{ env.ARCH }}/configs/${{ env.KERNEL_CONFIG }} || echo "⚠️ 写入 CONFIG_QCOM_SPMI 失败"
-            echo "CONFIG_MSM_SLEEP=y" >> arch/${{ env.ARCH }}/configs/${{ env.KERNEL_CONFIG }} || echo "⚠️ 写入 CONFIG_MSM_SLEEP 失败"
-            echo "CONFIG_QCOM_RTP=y" >> arch/${{ env.ARCH }}/configs/${{ env.KERNEL_CONFIG }} || echo "⚠️ 写入 CONFIG_QCOM_RTP 失败"
-            echo "CONFIG_QCOM_SPSS=y" >> arch/${{ env.ARCH }}/configs/${{ env.KERNEL_CONFIG }} || echo "⚠️ 写入 CONFIG_QCOM_SPSS 失败"
-            echo "CONFIG_QCOM_CLK_V2=y" >> arch/${{ env.ARCH }}/configs/${{ env.KERNEL_CONFIG }} || echo "⚠️ 写入 CONFIG_QCOM_CLK_V2 失败"
-        fi
-        if [ "${{ env.PLATFORM_MEDIATEK }}" = "true" ]; then
-            echo "✅ 启用 【联发科平台】 专属配置"
-            sed -i 's/CONFIG_QCOM_.*=y//g' arch/${{ env.ARCH }}/configs/${{ env.KERNEL_CONFIG }} 2>/dev/null
-            sed -i '/CONFIG_QCOM_/d' arch/${{ env.ARCH }}/configs/${{ env.KERNEL_CONFIG }} 2>/dev/null
-            echo "CONFIG_MTK_EMI=y" >> arch/${{ env.ARCH }}/configs/${{ env.KERNEL_CONFIG }} || echo "⚠️ 写入 CONFIG_MTK_EMI 失败"
-            echo "CONFIG_MTK_PMIC=y" >> arch/${{ env.ARCH }}/configs/${{ env.KERNEL_CONFIG }} || echo "⚠️ 写入 CONFIG_MTK_PMIC 失败"
-            echo "CONFIG_MTK_CLKMGR=y" >> arch/${{ env.ARCH }}/configs/${{ env.KERNEL_CONFIG }} || echo "⚠️ 写入 CONFIG_MTK_CLKMGR 失败"
-            echo "CONFIG_MTK_COMBO=y" >> arch/${{ env.ARCH }}/configs/${{ env.KERNEL_CONFIG }} || echo "⚠️ 写入 CONFIG_MTK_COMBO 失败"
-            echo "CONFIG_MTK_NFC_SUPPORT=y" >> arch/${{ env.ARCH }}/configs/${{ env.KERNEL_CONFIG }} || echo "⚠️ 写入 CONFIG_MTK_NFC_SUPPORT 失败"
-            echo "CONFIG_MTK_DRV=y" >> arch/${{ env.ARCH }}/configs/${{ env.KERNEL_CONFIG }} || echo "⚠️ 写入 CONFIG_MTK_DRV 失败"
-            echo "CONFIG_MTK_BOOT=y" >> arch/${{ env.ARCH }}/configs/${{ env.KERNEL_CONFIG }} || echo "⚠️ 写入 CONFIG_MTK_BOOT 失败"
-            echo "CONFIG_MTK_FB=y" >> arch/${{ env.ARCH }}/configs/${{ env.KERNEL_CONFIG }} || echo "⚠️ 写入 CONFIG_MTK_FB 失败"
-            echo "CONFIG_MTK_GPU=y" >> arch/${{ env.ARCH }}/configs/${{ env.KERNEL_CONFIG }} || echo "⚠️ 写入 CONFIG_MTK_GPU 失败"
-            sed -i 's/CONFIG_MTK_NFC_CLKBUF_ENABLE=y/CONFIG_MTK_NFC_CLKBUF_ENABLE=m/g' arch/${{ env.ARCH }}/configs/${{ env.KERNEL_CONFIG }} 2>/dev/null
-        fi
+      # if [ ${{ env.LLVM_CONFIG }} = true ]; then
+      #     LLVM_PARAMS="LLVM=1 LLVM_IAS=1 AR=llvm-ar NM=llvm-nm OBJCOPY=llvm-objcopy OBJDUMP=llvm-objdump STRIP=llvm-strip"
+      #     echo "LLVM_PARAMS=$LLVM_PARAMS" >> $GITHUB_ENV || echo "⚠️ 写入 LLVM_PARAMS 失败"
+      # fi
+      # echo '$LLVM_PARAMS'
+      # echo "⚠️ 配置目录 LLVM_CONFIG 已执行 "$LLVM_PARAMS" "
+      # if [ ${{ env.USE_VERSION_PARAMS_CONFIG }} = false ]; then
+      #     ANDROID_VER_INT=$(echo ${{ env.ANDROID_VERSION }} | awk '{print int($0)}')
+      #     if [ ANDROID_VER_INT -eq 10 ] || [ $ANDROID_VER_INT -eq 11 ]; then
+      #         VERSION_PARAMS="KBUILD_CFLAGS+=-Wno-error=deprecated-declarations KBUILD_CFLAGS+=-Wno-error=unused-const-variable"
+      #         echo "ANDROID_VERSION=$ANDROID_VERSION" >> $GITHUB_ENV || echo "⚠️ 写入 ANDROID_VERSION 失败"
+      #     elif [ ${{ env.ANDROID_VERSION }} -ge 12 ]; then
+      #         VERSION_PARAMS="KBUILD_CFLAGS+=-Wno-error=unused-but-set-variable KBUILD_CFLAGS+=-Wno-error=incompatible-pointer-types"
+      #         echo "ANDROID_VERSION=$ANDROID_VERSION" >> $GITHUB_ENV || echo "⚠️ 写入 ANDROID_VERSION 失败"
+      #     fi
+      #     KERNEL_VER_MAJOR=$(echo ${{ env.KERNEL_VERSION }} | cut -d. -f1 | awk '{print int($0)}')
+      #     echo "KERNEL_VER_MAJOR=$KERNEL_VER_MAJOR" >> $GITHUB_ENV || echo "⚠️ 写入 KERNEL_VER_MAJOR 失败"
+      #     KERNEL_VER_MINOR=$(echo ${{ env.KERNEL_VERSION }} | cut -d. -f2 | awk '{print int($0)}')
+      #     echo "KERNEL_VER_MINOR=$KERNEL_VER_MINOR" >> $GITHUB_ENV || echo "⚠️ 写入 KERNEL_VER_MINOR 失败"
+      #     if [ $KERNEL_VER_MAJOR -ge 5 ] || [ $KERNEL_VER_MINOR -ge 10 ]; then
+      #         if [ -n "$VERSION_PARAMS" ]; then
+      #             VERSION_PARAMS="$VERSION_PARAMS CONFIG_LTO_CLANG=y"
+      #             echo "VERSION_PARAMS=$VERSION_PARAMS" >> $GITHUB_ENV || echo "⚠️ 写入 VERSION_PARAMS 失败"
+      #         else
+      #             VERSION_PARAMS="CONFIG_LTO_CLANG=y"
+      #             echo "VERSION_PARAMS=$VERSION_PARAMS" >> $GITHUB_ENV || echo "⚠️ 写入 VERSION_PARAMS 失败"
+      #         fi
+      #     fi
+      #     echo "VERSION_PARAMS=$VERSION_PARAMS" >> $GITHUB_ENV || echo "⚠️ 写入 VERSION_PARAMS 失败"
+      # fi
+      # echo "⚠️ USE_VERSION_PARAMS_CONFIG 已执行"
+      # if [ ${{ env.ENABLE_KVM }} = true ]; then
+      #     echo "CONFIG_KVM=y" >> arch/${{ env.ARCH }}/configs/${{ env.KERNEL_CONFIG }} || echo "⚠️ 开启 CONFIG_KVM 失败"
+      #     echo "CONFIG_KVM_ARM64=y" >> arch/${{ env.ARCH }}/configs/${{ env.KERNEL_CONFIG }} || echo "⚠️ 开启 CONFIG_KVM_ARM64 失败"
+      # else
+      #     sed -i 's/CONFIG_KVM=y/CONFIG_KVM=n/g' arch/${{ env.ARCH }}/configs/${{ env.KERNEL_CONFIG }} 2>/dev/null
+      #     sed -i 's/CONFIG_KVM_ARM64=y/CONFIG_KVM_ARM64=n/g' arch/${{ env.ARCH }}/configs/${{ env.KERNEL_CONFIG }} 2>/dev/null
+      #     echo "CONFIG_KVM=n" >> arch/${{ env.ARCH }}/configs/${{ env.KERNEL_CONFIG }} || echo "⚠️ 关闭 CONFIG_KVM 失败"
+      # fi
+      # echo "⚠️ ENABLE_KVM 已执行"
+      # if [ ${{ env.DISABLE_STACK_PROTECTOR }} = true ]; then
+      #     echo "🔍 禁用栈保护配置（适配 Clang 兼容性）"
+      #     sed -i 's/CONFIG_CC_STACKPROTECTOR_STRONG=y/# CONFIG_CC_STACKPROTECTOR_STRONG is not set/g' arch/${{ env.ARCH }}/configs/${{ env.KERNEL_CONFIG }}
+      #     sed -i 's/CONFIG_CC_STACKPROTECTOR=y/# CONFIG_CC_STACKPROTECTOR is not set/g' arch/${{ env.ARCH }}/configs/${{ env.KERNEL_CONFIG }}
+      #     echo "✅ 栈保护配置修复完成"
+      # else
+      #     echo "🔍 保留默认栈保护配置"
+      # fi
+      # if [ ${{ env.PLATFORM_QUALCOMM }} = true ]; then
+      #     echo "✅ 启用 【骁龙平台】 专属配置"
+      #     sed -i 's/CONFIG_MTK_.*=y//g' arch/${{ env.ARCH }}/configs/${{ env.KERNEL_CONFIG }} 2>/dev/null
+      #     sed -i '/CONFIG_MTK_/d' arch/${{ env.ARCH }}/configs/${{ env.KERNEL_CONFIG }} 2>/dev/null
+      #     echo "CONFIG_QCOM_SCM=y" >> arch/${{ env.ARCH }}/configs/${{ env.KERNEL_CONFIG }} || echo "⚠️ 写入 CONFIG_QCOM_SCM 失败"
+      #     echo "CONFIG_QCOM_CLK=y" >> arch/${{ env.ARCH }}/configs/${{ env.KERNEL_CONFIG }} || echo "⚠️ 写入 CONFIG_QCOM_CLK 失败"
+      #     echo "CONFIG_QCOM_SPMI=y" >> arch/${{ env.ARCH }}/configs/${{ env.KERNEL_CONFIG }} || echo "⚠️ 写入 CONFIG_QCOM_SPMI 失败"
+      #     echo "CONFIG_MSM_SLEEP=y" >> arch/${{ env.ARCH }}/configs/${{ env.KERNEL_CONFIG }} || echo "⚠️ 写入 CONFIG_MSM_SLEEP 失败"
+      #     echo "CONFIG_QCOM_RTP=y" >> arch/${{ env.ARCH }}/configs/${{ env.KERNEL_CONFIG }} || echo "⚠️ 写入 CONFIG_QCOM_RTP 失败"
+      #     echo "CONFIG_QCOM_SPSS=y" >> arch/${{ env.ARCH }}/configs/${{ env.KERNEL_CONFIG }} || echo "⚠️ 写入 CONFIG_QCOM_SPSS 失败"
+      #     echo "CONFIG_QCOM_CLK_V2=y" >> arch/${{ env.ARCH }}/configs/${{ env.KERNEL_CONFIG }} || echo "⚠️ 写入 CONFIG_QCOM_CLK_V2 失败"
+      # fi
+      # if [ "${{ env.PLATFORM_MEDIATEK }}" = "true" ]; then
+      #     echo "✅ 启用 【联发科平台】 专属配置"
+      #     sed -i 's/CONFIG_QCOM_.*=y//g' arch/${{ env.ARCH }}/configs/${{ env.KERNEL_CONFIG }} 2>/dev/null
+      #     sed -i '/CONFIG_QCOM_/d' arch/${{ env.ARCH }}/configs/${{ env.KERNEL_CONFIG }} 2>/dev/null
+      #     echo "CONFIG_MTK_EMI=y" >> arch/${{ env.ARCH }}/configs/${{ env.KERNEL_CONFIG }} || echo "⚠️ 写入 CONFIG_MTK_EMI 失败"
+      #     echo "CONFIG_MTK_PMIC=y" >> arch/${{ env.ARCH }}/configs/${{ env.KERNEL_CONFIG }} || echo "⚠️ 写入 CONFIG_MTK_PMIC 失败"
+      #     echo "CONFIG_MTK_CLKMGR=y" >> arch/${{ env.ARCH }}/configs/${{ env.KERNEL_CONFIG }} || echo "⚠️ 写入 CONFIG_MTK_CLKMGR 失败"
+      #     echo "CONFIG_MTK_COMBO=y" >> arch/${{ env.ARCH }}/configs/${{ env.KERNEL_CONFIG }} || echo "⚠️ 写入 CONFIG_MTK_COMBO 失败"
+      #     echo "CONFIG_MTK_NFC_SUPPORT=y" >> arch/${{ env.ARCH }}/configs/${{ env.KERNEL_CONFIG }} || echo "⚠️ 写入 CONFIG_MTK_NFC_SUPPORT 失败"
+      #     echo "CONFIG_MTK_DRV=y" >> arch/${{ env.ARCH }}/configs/${{ env.KERNEL_CONFIG }} || echo "⚠️ 写入 CONFIG_MTK_DRV 失败"
+      #     echo "CONFIG_MTK_BOOT=y" >> arch/${{ env.ARCH }}/configs/${{ env.KERNEL_CONFIG }} || echo "⚠️ 写入 CONFIG_MTK_BOOT 失败"
+      #     echo "CONFIG_MTK_FB=y" >> arch/${{ env.ARCH }}/configs/${{ env.KERNEL_CONFIG }} || echo "⚠️ 写入 CONFIG_MTK_FB 失败"
+      #     echo "CONFIG_MTK_GPU=y" >> arch/${{ env.ARCH }}/configs/${{ env.KERNEL_CONFIG }} || echo "⚠️ 写入 CONFIG_MTK_GPU 失败"
+      #     sed -i 's/CONFIG_MTK_NFC_CLKBUF_ENABLE=y/CONFIG_MTK_NFC_CLKBUF_ENABLE=m/g' arch/${{ env.ARCH }}/configs/${{ env.KERNEL_CONFIG }} 2>/dev/null
+      # fi
       # if [ ${{ env.SWITCH_PYTHON }} = true ]; then
       #     update-alternatives --set python /usr/bin/python2 2>/dev/null
       #     export PYTHON=/usr/bin/python2
@@ -447,21 +447,6 @@ jobs:
           export KSU_EXPECTED_SIZE=${{ env.KSU_EXPECTED_SIZE }}
           export KSU_EXPECTED_HASH=${{ env.KSU_EXPECTED_HASH }}
         fi
-        
-        CUSTOM_CMDS="${{ env.CUSTOM_CMDS }}"
-        EXTRA_CMDS="${{ env.EXTRA_CMDS }}"
-        GCC64="${{ env.GCC_64 }}"
-        GCC32="${{ env.GCC_32 }}"
-        KERNEL_CFG="${{ env.KERNEL_CONFIG }}"
-        
-        PARAMS=""
-        [ -n "$CUSTOM_CMDS" ] && [ "$CUSTOM_CMDS" != "false" ] && PARAMS="$PARAMS $CUSTOM_CMDS"
-        [ -n "$EXTRA_CMDS" ] && [ "$EXTRA_CMDS" != "false" ] && PARAMS="$PARAMS $EXTRA_CMDS"
-        [ -n "$GCC64" ] && [ "$GCC64" != "false" ] && PARAMS="$PARAMS $GCC64"
-        [ -n "$GCC32" ] && [ "$GCC32" != "false" ] && PARAMS="$PARAMS $GCC32"
-        [ -n "$KERNEL_CFG" ] && PARAMS="$PARAMS $KERNEL_CFG"
-        
-        echo "🔧 最终编译参数：$PARAMS"
         
         make -j$(nproc --all) CC=clang O=out ARCH=${{ env.ARCH }} ${{ env.CUSTOM_CMDS }} ${{ env.EXTRA_CMDS }} ${{ env.GCC_64 }} ${{ env.GCC_32 }} ${{ env.KERNEL_CONFIG }}
         if [ ${{ env.ENABLE_CCACHE }} = true ]; then
