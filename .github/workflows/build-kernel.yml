@@ -107,6 +107,7 @@ jobs:
       uses: actions/cache@v3
       with:
         path: |
+            ${{ github.workspace }}/kernel_workspace/android-kernel
             ${{ github.workspace }}/kernel_workspace/clang-aosp
             ${{ github.workspace }}/kernel_workspace/gcc-64
             ${{ github.workspace }}/kernel_workspace/gcc-32
@@ -302,13 +303,15 @@ jobs:
             else
                 echo "CONFIG_KSU=y" >> arch/${{ env.ARCH }}/configs/${{ env.KERNEL_CONFIG }}
             fi
-        else
+        elif [ -d arch/${{ env.ARCH }}/configs/${{ env.KERNEL_CONFIG }} ]; then
             if grep -q "CONFIG_KSU" arch/${{ env.ARCH }}/configs/${{ env.KERNEL_CONFIG }}; then
                 sed -i 's/# CONFIG_KSU is not set/CONFIG_KSU=y/g' arch/${{ env.ARCH }}/configs/${{ env.KERNEL_CONFIG }}
                 sed -i 's/CONFIG_KSU=n/CONFIG_KSU=y/g' arch/${{ env.ARCH }}/configs/${{ env.KERNEL_CONFIG }}
             else
                 echo "CONFIG_KSU=n" >> arch/${{ env.ARCH }}/configs/${{ env.KERNEL_CONFIG }}
             fi
+        else
+            echo "⚠️ 配置目录 $GITHUB_WORKSPACE/kernel_workspace/android-kernel/arch/${{ env.ARCH }}/configs/${{ env.KERNEL_CONFIG }} 不存在，跳过 CONFIG_KSU 配置"
         fi
         if [ ${{ env.ADD_KPROBES_CONFIG }} == 'true' -a ${{ env.APPLY_KSU_PATCH }} != 'true' ]; then
             echo "CONFIG_MODULES=y" >> arch/${{ env.ARCH }}/configs/${{ env.KERNEL_CONFIG }}
@@ -508,6 +511,7 @@ jobs:
       uses: actions/cache/save@v3
       with:
         path: |
+          ${{ github.workspace }}/kernel_workspace/android-kernel
           ${{ github.workspace }}/kernel_workspace/clang-aosp
           ${{ github.workspace }}/kernel_workspace/gcc-64
           ${{ github.workspace }}/kernel_workspace/gcc-32
