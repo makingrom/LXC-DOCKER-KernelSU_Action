@@ -116,10 +116,10 @@ jobs:
             ${{ github.workspace }}/kernel_workspace/gcc-32
             ${{ github.workspace }}/kernel_workspace/tools
             ${{ github.workspace }}/kernel_workspace/boot-source.img
-        key: ${{ runner.os }}-clang-${{ env.CLANG_BRANCH }}-${{ env.CLANG_VERSION }}-kernel-${{ env.KERNEL_VERSION }}-${{ env.DEVICE_CODENAME }}
+        key: ${{ runner.os }}-${{ env.KERNEL_CONFIG }}-${{ env.KERNEL_SOURCE_BRANCH }}-${{ env.ANDROID_VERSION }}-clang-${{ env.CLANG_BRANCH }}-${{ env.CLANG_VERSION }}-kernel-${{ env.KERNEL_VERSION }}
         restore-keys: |
-            ${{ runner.os }}-clang-${{ env.CLANG_BRANCH }}-${{ env.CLANG_VERSION }}-kernel-${{ env.KERNEL_VERSION }}-
-            ${{ runner.os }}-clang-${{ env.CLANG_BRANCH }}-${{ env.CLANG_VERSION }}-
+            ${{ runner.os }}-${{ env.KERNEL_CONFIG }}-${{ env.KERNEL_SOURCE_BRANCH }}-${{ env.ANDROID_VERSION }}-clang-${{ env.CLANG_BRANCH }}-${{ env.CLANG_VERSION }}-kernel-${{ env.KERNEL_VERSION }}-
+            ${{ runner.os }}-${{ env.KERNEL_CONFIG }}-${{ env.KERNEL_SOURCE_BRANCH }}-${{ env.ANDROID_VERSION }}-clang-${{ env.CLANG_BRANCH }}-${{ env.CLANG_VERSION }}-
 
     - name: Download Clang-aosp
       if: env.USE_CUSTOM_CLANG != 'true'
@@ -596,4 +596,4 @@ jobs:
           ${{ github.workspace }}/kernel_workspace/gcc-32
           ${{ github.workspace }}/kernel_workspace/tools
           ${{ github.workspace }}/kernel_workspace/boot-source.img
-        key: ${{ runner.os }}-clang-${{ env.CLANG_BRANCH }}-${{ env.CLANG_VERSION }}-kernel-${{ env.KERNEL_VERSION }}-${{ env.DEVICE_CODENAME }}
+        key: ${{ runner.os }}-${{ env.KERNEL_CONFIG }}-${{ env.KERNEL_SOURCE_BRANCH }}-${{ env.ANDROID_VERSION }}-clang-${{ env.CLANG_BRANCH }}-${{ env.CLANG_VERSION }}-kernel-${{ env.KERNEL_VERSION }}
