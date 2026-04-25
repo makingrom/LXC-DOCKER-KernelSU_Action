@@ -318,7 +318,7 @@ jobs:
                 echo "🔍 检查文件是否存在："
                 ls -la "$GITHUB_WORKSPACE/kernel_workspace/android-kernel/arch/${{ env.ARCH }}/configs/${{ env.KERNEL_CONFIG }}" 2>&1 || echo "❌ 文件不存在！"
             else
-                if [ -f "$CONFIG_FILE" ]; then
+                if [ -f "$GITHUB_WORKSPACE/kernel_workspace/android-kernel/arch/${{ env.ARCH }}/configs/${{ env.KERNEL_CONFIG }}" ]; then
                     echo "⚠️ 文件存在，但未找到 CONFIG_KSU 配置项！"
                 else
                     echo "❌ grep 失败：文件不存在/无法访问！"
