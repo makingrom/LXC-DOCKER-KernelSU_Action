@@ -312,11 +312,19 @@ jobs:
                 echo "CONFIG_KSU=n" >> arch/${{ env.ARCH }}/configs/${{ env.KERNEL_CONFIG }}
             fi
         else
+            echo "⚠️ 配置目录 $(pwd)"
             if grep -q "CONFIG_KSU" arch/${{ env.ARCH }}/configs/${{ env.KERNEL_CONFIG }}; then
                 echo "🔍 配置文件完整路径：$GITHUB_WORKSPACE/kernel_workspace/android-kernel/arch/${{ env.ARCH }}/configs/${{ env.KERNEL_CONFIG }}"
                 echo "🔍 检查文件是否存在："
                 ls -la "$GITHUB_WORKSPACE/kernel_workspace/android-kernel/arch/${{ env.ARCH }}/configs/${{ env.KERNEL_CONFIG }}" 2>&1 || echo "❌ 文件不存在！"
+            else
+                if [ -f "$CONFIG_FILE" ]; then
+                    echo "⚠️ 文件存在，但未找到 CONFIG_KSU 配置项！"
+                else
+                    echo "❌ grep 失败：文件不存在/无法访问！"
+                fi
             fi
+            echo "⚠️ 配置目录 $(pwd)"
             echo "🔍 if grep -q "CONFIG_KSU" arch/${{ env.ARCH }}/configs/${{ env.KERNEL_CONFIG }} 执行失败"
         fi
         if [ ${{ env.ADD_KPROBES_CONFIG }} == 'true' -a ${{ env.APPLY_KSU_PATCH }} != 'true' ]; then
