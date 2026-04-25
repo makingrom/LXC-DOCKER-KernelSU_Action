@@ -183,7 +183,7 @@ jobs:
         fi
 
     - name: Download Custom-Gcc
-      if: env.USE_CUSTOM_GCC_64 = true || env.USE_CUSTOM_GCC_32 == 'true'
+      if: env.USE_CUSTOM_GCC_64 == 'true' || env.USE_CUSTOM_GCC_32 == 'true'
       run: |
         cd $GITHUB_WORKSPACE/kernel_workspace
         if [ ${{ env.USE_CUSTOM_GCC_64 }} = true ]; then
@@ -436,7 +436,7 @@ jobs:
        fi
 
     - name: Make Anykernel3
-      if: env.CHECK_FILE_IS_OK = true && env.USE_CUSTOM_ANYKERNEL3 != 'true'
+      if: env.CHECK_FILE_IS_OK == 'true' && env.USE_CUSTOM_ANYKERNEL3 != 'true'
       run: |
         cd $GITHUB_WORKSPACE/kernel_workspace
         git clone https://github.com/osm0sis/AnyKernel3 --depth=1 AnyKernel3
@@ -450,7 +450,7 @@ jobs:
         rm -rf AnyKernel3/.git* AnyKernel3/README.md
 
     - name: Make Custom-Anykernel3
-      if: env.CHECK_FILE_IS_OK = true && env.USE_CUSTOM_ANYKERNEL3 == 'true'
+      if: env.CHECK_FILE_IS_OK == 'true' && env.USE_CUSTOM_ANYKERNEL3 == 'true'
       run: |
         cd $GITHUB_WORKSPACE/kernel_workspace
         if [[ ${{ env.CUSTOM_ANYKERNEL3_SOURCE }} =~ git ]]; then
@@ -473,7 +473,7 @@ jobs:
         rm -rf AnyKernel3/.git* AnyKernel3/README.md
 
     - name: Make boot image
-      if: env.HAVE_SOURCE_BOOT_IMAGE = true && env.CHECK_FILE_IS_OK == 'true'
+      if: env.HAVE_SOURCE_BOOT_IMAGE == 'true' && env.CHECK_FILE_IS_OK == 'true'
       run: |
         cd $GITHUB_WORKSPACE/kernel_workspace
         tools/unpack_bootimg.py --boot_img boot-source.img
