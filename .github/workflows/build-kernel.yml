@@ -19,9 +19,7 @@ jobs:
             KERNEL_SOURCE
             KERNEL_SOURCE_BRANCH
             KERNEL_CONFIG
-            # ANDROID_VERSION
-            # ANDROID_VER_INT
-            # KERNEL_VERSION
+
             KERNEL_IMAGE_NAME
             ARCH
             ADD_LOCALVERSION_TO_FILENAME
@@ -42,17 +40,14 @@ jobs:
             CUSTOM_GCC_32_BRANCH
             CUSTOM_GCC_32_BIN
             ENABLE_KERNELSU
-            # KERNELSU_BRANCH
+
             KERNELSU_TAG
-            # KSU_EXPECTED_SIZE
-            # KSU_EXPECTED_HASH
+
             USE_CUSTOM_ANYKERNEL3
             CUSTOM_ANYKERNEL3_SOURCE
             CUSTOM_ANYKERNEL3_BRANCH
             DISABLE_STACK_PROTECTOR
-            # PLATFORM_QUALCOMM
-            # PLATFORM_MEDIATEK
-            # SWITCH_PYTHON
+
             DISABLE_LTO
             DISABLE_CC_WERROR
             ADD_KPROBES_CONFIG
@@ -60,19 +55,14 @@ jobs:
             APPLY_KSU_PATCH
             ENABLE_KVM
             EXTRA_CMDS
-            # LLVM_CONFIG
-            # LLVM_PARAMS
-            # USE_VERSION_PARAMS_CONFIG
-            # KERNEL_VER_MAJOR
-            # KERNEL_VER_MINOR
-            # VERSION_PARAMS
+
             REMOVE_UNUSED_PACKAGES
             ENABLE_CCACHE
             NEED_DTBO
             BUILD_BOOT_IMG
             SOURCE_BOOT_IMAGE
         )
-
+      
         for CONFIG in "${CONFIG_LIST[@]}"; do
             if [[ "$CONFIG" == "EXTRA_CMDS" || "$CONFIG" == "CUSTOM_CMDS" ]]; then
                 echo "$CONFIG=$(grep -w "$CONFIG" "$CONFIG_ENV" | head -n 1 | cut -d ":" -f 2)" >> $GITHUB_ENV
@@ -80,6 +70,21 @@ jobs:
                 echo "$CONFIG=$(grep -w "$CONFIG" "$CONFIG_ENV" | head -n 1 | cut -d "=" -f 2)" >> $GITHUB_ENV
             fi
         done
+      # ANDROID_VERSION
+      # ANDROID_VER_INT
+      # KERNEL_VERSION
+      # KERNELSU_BRANCH
+      # KSU_EXPECTED_SIZE
+      # KSU_EXPECTED_HASH
+      # PLATFORM_QUALCOMM
+      # PLATFORM_MEDIATEK
+      # SWITCH_PYTHON
+      # LLVM_CONFIG
+      # LLVM_PARAMS
+      # USE_VERSION_PARAMS_CONFIG
+      # KERNEL_VER_MAJOR
+      # KERNEL_VER_MINOR
+      # VERSION_PARAMS
 
     - name: Remove unused packages
       if: env.REMOVE_UNUSED_PACKAGES == 'true'
