@@ -53,7 +53,7 @@ jobs:
             ADD_KPROBES_CONFIG
             ADD_OVERLAYFS_CONFIG
             APPLY_KSU_PATCH
-            ENABLE_KVM
+            USE_ENABLE_KVM
             EXTRA_CMDS
 
             REMOVE_UNUSED_PACKAGES
@@ -68,8 +68,7 @@ jobs:
             KERNELSU_BRANCH
             KSU_EXPECTED_SIZE
             KSU_EXPECTED_HASH
-            PLATFORM_QUALCOMM
-            PLATFORM_MEDIATEK
+            Device_Processor_Selection
             SWITCH_PYTHON
             LLVM_CONFIG
             LLVM_PARAMS
@@ -320,7 +319,6 @@ jobs:
         else
             echo "🔍 保持默认 KSU 配置"
         fi
-        echo "⚠️ APPLY_KSU_PATCH 已执行"
         if [ ${{ env.ADD_KPROBES_CONFIG }} = true -a ${{ env.APPLY_KSU_PATCH }} != true ]; then
             echo "CONFIG_MODULES=y" >> arch/${{ env.ARCH }}/configs/${{ env.KERNEL_CONFIG }} || echo "⚠️ 开启 MODULES 失败"
             echo "CONFIG_KPROBES=y" >> arch/${{ env.ARCH }}/configs/${{ env.KERNEL_CONFIG }} || echo "⚠️ 开启 CONFIG_KPROBES 失败"
@@ -336,7 +334,6 @@ jobs:
         else
             echo "🔍 保持默认 kprobes 配置"
         fi
-        echo "⚠️ ADD_KPROBES_CONFIG 已执行"
         if [ ${{ env.ADD_OVERLAYFS_CONFIG }} = true ]; then
         echo "CONFIG_OVERLAY_FS=y" >> arch/${{ env.ARCH }}/configs/${{ env.KERNEL_CONFIG }} || echo "⚠️ 开启 CONFIG_OVERLAY_FS 失败"
             echo "✅ 已启用 OverlayFS"
@@ -346,7 +343,6 @@ jobs:
         else
             echo "🔍 保持默认 OverlayFS 配置"
         fi
-        echo "⚠️ ADD_OVERLAYFS_CONFIG 已执行"
         if [ ${{ env.DISABLE_LTO }} = true ]; then
             sed -i 's/CONFIG_LTO=n/CONFIG_LTO=y/' arch/${{ env.ARCH }}/configs/${{ env.KERNEL_CONFIG }}
             sed -i 's/CONFIG_LTO_CLANG=n/CONFIG_LTO_CLANG=y/' arch/${{ env.ARCH }}/configs/${{ env.KERNEL_CONFIG }}
@@ -362,7 +358,6 @@ jobs:
         else
             echo "🔍 保持默认 LTO 配置"
         fi
-        echo "⚠️ DISABLE_LTO 已执行"
         if [ ${{ env.DISABLE_CC_WERROR }} = true ]; then
             echo "CONFIG_CC_WERROR=y" >> arch/${{ env.ARCH }}/configs/${{ env.KERNEL_CONFIG }} || echo "⚠️ 开启错误警告失败"
             echo "✅ 已开启内核错误警告"
@@ -372,13 +367,11 @@ jobs:
         else
             echo "🔍 保持默认错误警告配置"
         fi
-        echo "⚠️ DISABLE_CC_WERROR 已执行"
         if [ ${{ env.LLVM_CONFIG }} = true ]; then
             LLVM_PARAMS="LLVM=1 LLVM_IAS=1 AR=llvm-ar NM=llvm-nm OBJCOPY=llvm-objcopy OBJDUMP=llvm-objdump STRIP=llvm-strip"
             echo "LLVM_PARAMS=$LLVM_PARAMS" >> $GITHUB_ENV || echo "⚠️ 写入 LLVM_PARAMS 失败"
         fi
         echo '$LLVM_PARAMS'
-        echo "⚠️ 配置目录 LLVM_CONFIG 已执行 "$LLVM_PARAMS" "
         if [ ${{ env.USE_VERSION_PARAMS_CONFIG }} = false ]; then
             ANDROID_VER_INT=$(echo ${{ env.ANDROID_VERSION }} | awk '{print int($0)}')
             if [ ANDROID_VER_INT -eq 10 ] || [ $ANDROID_VER_INT -eq 11 ]; then
@@ -403,7 +396,6 @@ jobs:
             fi
             echo "VERSION_PARAMS=$VERSION_PARAMS" >> $GITHUB_ENV || echo "⚠️ 写入 VERSION_PARAMS 失败"
         fi
-        echo "⚠️ USE_VERSION_PARAMS_CONFIG 已执行"
         if [ ${{ env.USE_ENABLE_KVM }} = true ]; then
             echo "CONFIG_KVM=y" >> arch/${{ env.ARCH }}/configs/${{ env.KERNEL_CONFIG }}
             echo "CONFIG_KVM_ARM64=y" >> arch/${{ env.ARCH }}/configs/${{ env.KERNEL_CONFIG }}
@@ -414,7 +406,6 @@ jobs:
         else
             echo "✅ USE_ENABLE_KVM 未配置，保持内核默认 KVM 状态"
         fi
-        echo "⚠️ USE_ENABLE_KVM 已执行"
         if [ ${{ env.DISABLE_STACK_PROTECTOR }} = true ]; then
             echo "🔍 启用栈保护配置"
             sed -i 's/# CONFIG_CC_STACKPROTECTOR_STRONG is not set/CONFIG_CC_STACKPROTECTOR_STRONG=y/g' arch/${{ env.ARCH }}/configs/${{ env.KERNEL_CONFIG }}
