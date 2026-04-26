@@ -264,7 +264,7 @@ jobs:
             echo "✅ android-kernel 目录已存在（缓存恢复），跳过下载！开始同步！"
             cd android-kernel && git pull
         fi
-        if [[ "${{ env.ADD_LOCALVERSION_TO_FILENAME }}" = "true" ]]; then
+        if [ "${{ env.ADD_LOCALVERSION_TO_FILENAME }}" = "true" ]; then
             echo "LOCALVERSION=$(cat android-kernel/localversion)" >> $GITHUB_ENV || echo "⚠️ 写入 LOCALVERSION 失败"
         else
             echo "LOCALVERSION=" >> $GITHUB_ENV || echo "⚠️ 写入 LOCALVERSION 失败"
@@ -325,7 +325,7 @@ jobs:
             echo "CONFIG_HAVE_KPROBES=y" >> arch/${{ env.ARCH }}/configs/${{ env.KERNEL_CONFIG }} || echo "⚠️ 开启 CONFIG_HAVE_KPROBES 失败"
             echo "CONFIG_KPROBE_EVENTS=y" >> arch/${{ env.ARCH }}/configs/${{ env.KERNEL_CONFIG }} || echo "⚠️ 开启 CONFIG_KPROBE_EVENTS 失败"
             echo "✅ 已启用 kprobes 相关配置"
-        elif [ "${{ env.ADD_KPROBES_CONFIG }}" = "false" ]; then
+        elif [ "${{ env.ADD_KPROBES_CONFIG }}" = "true" ]; then
             echo "CONFIG_MODULES=n" >> arch/${{ env.ARCH }}/configs/${{ env.KERNEL_CONFIG }} || echo "⚠️ 关闭 MODULES 失败"
             echo "CONFIG_KPROBES=n" >> arch/${{ env.ARCH }}/configs/${{ env.KERNEL_CONFIG }} || echo "⚠️ 关闭 CONFIG_KPROBES 失败"
             echo "CONFIG_HAVE_KPROBES=n" >> arch/${{ env.ARCH }}/configs/${{ env.KERNEL_CONFIG }} || echo "⚠️ 关闭 CONFIG_HAVE_KPROBES 失败"
@@ -469,6 +469,10 @@ jobs:
     - name: Build kernel
       run: |
         cd $GITHUB_WORKSPACE/kernel_workspace/android-kernel
+        
+        rm -rf out/
+        make mrproper 2>/dev/null || true
+        
         echo "==================== 调试输出 ===================="
         echo "KBUILD_BUILD_USER=$KBUILD_BUILD_USER"
         echo "KBUILD_BUILD_HOST=$KBUILD_BUILD_HOST"
