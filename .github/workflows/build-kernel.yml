@@ -374,7 +374,7 @@ jobs:
         echo '$LLVM_PARAMS'
         if [ ${{ env.USE_VERSION_PARAMS_CONFIG }} = false ]; then
             ANDROID_VER_INT=$(echo ${{ env.ANDROID_VERSION }} | awk '{print int($0)}')
-            if [ ANDROID_VER_INT -eq 10 ] || [ $ANDROID_VER_INT -eq 11 ]; then
+            if [ "$ANDROID_VER_INT" -eq 10 ] || [ "$ANDROID_VER_INT" -eq 11 ]; then
                 VERSION_PARAMS="KBUILD_CFLAGS+=-Wno-error=deprecated-declarations KBUILD_CFLAGS+=-Wno-error=unused-const-variable"
                 echo "ANDROID_VERSION=$ANDROID_VERSION" >> $GITHUB_ENV || echo "⚠️ 写入 ANDROID_VERSION 失败"
             elif [ ${{ env.ANDROID_VERSION }} -ge 12 ]; then
@@ -447,11 +447,11 @@ jobs:
         else
             echo "🔍 未选择平台，保持默认内核配置"
         fi
-        if [ ${{ env.SWITCH_PYTHON }} = true ]; then
+        if [ "${{ env.SWITCH_PYTHON }}" = "true" ]; then
             update-alternatives --set python /usr/bin/python3 2>/dev/null
             export PYTHON=/usr/bin/python3
             echo "✅ Python 已切换到 python3"
-        elif [ ${{ env.SWITCH_PYTHON }} = false ]; then
+        elif [ "${{ env.SWITCH_PYTHON }}" = "false" ]; then
             update-alternatives --set python /usr/bin/python2 2>/dev/null
             export PYTHON=/usr/bin/python2
             echo "✅ Python 已切换到 python2"
