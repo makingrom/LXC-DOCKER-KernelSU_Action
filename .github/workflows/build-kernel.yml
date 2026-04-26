@@ -61,6 +61,22 @@ jobs:
             NEED_DTBO
             BUILD_BOOT_IMG
             SOURCE_BOOT_IMAGE
+
+            ANDROID_VERSION
+            ANDROID_VER_INT
+            KERNEL_VERSION
+            KERNELSU_BRANCH
+            KSU_EXPECTED_SIZE
+            KSU_EXPECTED_HASH
+            PLATFORM_QUALCOMM
+            PLATFORM_MEDIATEK
+            SWITCH_PYTHON
+            LLVM_CONFIG
+            LLVM_PARAMS
+            USE_VERSION_PARAMS_CONFIG
+            KERNEL_VER_MAJOR
+            KERNEL_VER_MINOR
+            VERSION_PARAMS
         )
       
         for CONFIG in "${CONFIG_LIST[@]}"; do
@@ -70,21 +86,6 @@ jobs:
                 echo "$CONFIG=$(grep -w "$CONFIG" "$CONFIG_ENV" | head -n 1 | cut -d "=" -f 2)" >> $GITHUB_ENV
             fi
         done
-      # ANDROID_VERSION
-      # ANDROID_VER_INT
-      # KERNEL_VERSION
-      # KERNELSU_BRANCH
-      # KSU_EXPECTED_SIZE
-      # KSU_EXPECTED_HASH
-      # PLATFORM_QUALCOMM
-      # PLATFORM_MEDIATEK
-      # SWITCH_PYTHON
-      # LLVM_CONFIG
-      # LLVM_PARAMS
-      # USE_VERSION_PARAMS_CONFIG
-      # KERNEL_VER_MAJOR
-      # KERNEL_VER_MINOR
-      # VERSION_PARAMS
 
     - name: Remove unused packages
       if: env.REMOVE_UNUSED_PACKAGES == 'true'
@@ -296,144 +297,176 @@ jobs:
     - name: Setup Configuration for Kernel
       run: |
         echo "当前目录：$(pwd)"
-      # cd $GITHUB_WORKSPACE/kernel_workspace/android-kernel
-      # if [ ${{ env.APPLY_KSU_PATCH }} = true ]; then
-      #     echo "当前目录：$(pwd)"
-      #     bash $GITHUB_WORKSPACE/patches/patches.sh || echo "patches.sh 执行失败，但继续"
-      #     if grep -q "CONFIG_KSU" arch/${{ env.ARCH }}/configs/${{ env.KERNEL_CONFIG }}; then
-      #         sed -i 's/# CONFIG_KSU is not set/CONFIG_KSU=y/g' arch/${{ env.ARCH }}/configs/${{ env.KERNEL_CONFIG }}
-      #         sed -i 's/CONFIG_KSU=n/CONFIG_KSU=y/g' arch/${{ env.ARCH }}/configs/${{ env.KERNEL_CONFIG }}
-      #     else
-      #         echo "CONFIG_KSU=y" >> arch/${{ env.ARCH }}/configs/${{ env.KERNEL_CONFIG }} || echo "⚠️ 开启 CONFIG_KSU 失败"
-      #     fi
-      # else
-      #     echo "⚠️ 配置目录 $(pwd)"
-      #     if grep -q "CONFIG_KSU" arch/${{ env.ARCH }}/configs/${{ env.KERNEL_CONFIG }}; then
-      #         sed -i 's/# CONFIG_KSU is not set/CONFIG_KSU=y/g' arch/${{ env.ARCH }}/configs/${{ env.KERNEL_CONFIG }}
-      #         sed -i 's/CONFIG_KSU=n/CONFIG_KSU=y/g' arch/${{ env.ARCH }}/configs/${{ env.KERNEL_CONFIG }}
-      #     else
-      #         echo "CONFIG_KSU=n" >> arch/${{ env.ARCH }}/configs/${{ env.KERNEL_CONFIG }} || echo "⚠️ 关闭 CONFIG_KSU 失败"
-      #     fi
-      # fi
-      # echo "⚠️ APPLY_KSU_PATCH 已执行"
-      # if [ ${{ env.ADD_KPROBES_CONFIG }} = true -a ${{ env.APPLY_KSU_PATCH }} != true ]; then
-      #     echo "CONFIG_MODULES=y" >> arch/${{ env.ARCH }}/configs/${{ env.KERNEL_CONFIG }} || echo "⚠️ 开启 MODULES 失败"
-      #     echo "CONFIG_KPROBES=y" >> arch/${{ env.ARCH }}/configs/${{ env.KERNEL_CONFIG }} || echo "⚠️ 开启 CONFIG_KPROBES 失败"
-      #     echo "CONFIG_HAVE_KPROBES=y" >> arch/${{ env.ARCH }}/configs/${{ env.KERNEL_CONFIG }} || echo "⚠️ 开启 CONFIG_HAVE_KPROBES 失败"
-      #     echo "CONFIG_KPROBE_EVENTS=y" >> arch/${{ env.ARCH }}/configs/${{ env.KERNEL_CONFIG }} || echo "⚠️ 开启 CONFIG_KPROBE_EVENTS 失败"
-      # else
-      #     echo "CONFIG_MODULES=n" >> arch/${{ env.ARCH }}/configs/${{ env.KERNEL_CONFIG }} || echo "⚠️ 关闭 MODULES 失败"
-      #     echo "CONFIG_KPROBES=n" >> arch/${{ env.ARCH }}/configs/${{ env.KERNEL_CONFIG }} || echo "⚠️ 关闭 CONFIG_KPROBES 失败"
-      #     echo "CONFIG_HAVE_KPROBES=n" >> arch/${{ env.ARCH }}/configs/${{ env.KERNEL_CONFIG }} || echo "⚠️ 关闭 CONFIG_HAVE_KPROBES 失败"
-      #     echo "CONFIG_KPROBE_EVENTS=n" >> arch/${{ env.ARCH }}/configs/${{ env.KERNEL_CONFIG }} || echo "⚠️ 关闭 CONFIG_KPROBE_EVENTS 失败"
-      # fi
-      # echo "⚠️ ADD_KPROBES_CONFIG 已执行"
-      # if [ ${{ env.ADD_OVERLAYFS_CONFIG }} = true ]; then
-      #     echo "CONFIG_OVERLAY_FS=y" >> arch/${{ env.ARCH }}/configs/${{ env.KERNEL_CONFIG }} || echo "⚠️ 开启 CONFIG_OVERLAY_FS 失败"
-      # else
-      #     echo "CONFIG_OVERLAY_FS=n" >> arch/${{ env.ARCH }}/configs/${{ env.KERNEL_CONFIG }} || echo "⚠️ 关闭 CONFIG_OVERLAY_FS 失败"
-      # fi
-      # echo "⚠️ ADD_OVERLAYFS_CONFIG 已执行"
-      # if [ ${{ env.DISABLE_LTO }} = true ]; then
-      #     sed -i 's/CONFIG_LTO=y/CONFIG_LTO=n/' arch/${{ env.ARCH }}/configs/${{ env.KERNEL_CONFIG }}
-      #     sed -i 's/CONFIG_LTO_CLANG=y/CONFIG_LTO_CLANG=n/' arch/${{ env.ARCH }}/configs/${{ env.KERNEL_CONFIG }}
-      #     sed -i 's/CONFIG_THINLTO=y/CONFIG_THINLTO=n/' arch/${{ env.ARCH }}/configs/${{ env.KERNEL_CONFIG }}
-      #     echo "CONFIG_LTO_NONE=y" >> arch/${{ env.ARCH }}/configs/${{ env.KERNEL_CONFIG }} || echo "⚠️ 开启 LTO 优化失败"
-      # else
-      #     sed -i 's/CONFIG_LTO=y/CONFIG_LTO=n/' arch/${{ env.ARCH }}/configs/${{ env.KERNEL_CONFIG }}
-      #     sed -i 's/CONFIG_LTO_CLANG=y/CONFIG_LTO_CLANG=n/' arch/${{ env.ARCH }}/configs/${{ env.KERNEL_CONFIG }}
-      #     sed -i 's/CONFIG_THINLTO=y/CONFIG_THINLTO=n/' arch/${{ env.ARCH }}/configs/${{ env.KERNEL_CONFIG }}
-      #     echo "CONFIG_LTO_NONE=n" >> arch/${{ env.ARCH }}/configs/${{ env.KERNEL_CONFIG }} || echo "⚠️ 关闭 LTO 优化失败"
-      # fi
-      # echo "⚠️ DISABLE_LTO 已执行"
-      # if [ ${{ env.DISABLE_CC_WERROR }} = true ]; then
-      #     echo "CONFIG_CC_WERROR=n" >> arch/${{ env.ARCH }}/configs/${{ env.KERNEL_CONFIG }} || echo "⚠️ 关闭错误警告失败"
-      # else
-      #     echo "CONFIG_CC_WERROR=y" >> arch/${{ env.ARCH }}/configs/${{ env.KERNEL_CONFIG }} || echo "⚠️ 开启错误警告失败"
-      # fi
-      # echo "⚠️ DISABLE_CC_WERROR 已执行"
-      # if [ ${{ env.LLVM_CONFIG }} = true ]; then
-      #     LLVM_PARAMS="LLVM=1 LLVM_IAS=1 AR=llvm-ar NM=llvm-nm OBJCOPY=llvm-objcopy OBJDUMP=llvm-objdump STRIP=llvm-strip"
-      #     echo "LLVM_PARAMS=$LLVM_PARAMS" >> $GITHUB_ENV || echo "⚠️ 写入 LLVM_PARAMS 失败"
-      # fi
-      # echo '$LLVM_PARAMS'
-      # echo "⚠️ 配置目录 LLVM_CONFIG 已执行 "$LLVM_PARAMS" "
-      # if [ ${{ env.USE_VERSION_PARAMS_CONFIG }} = false ]; then
-      #     ANDROID_VER_INT=$(echo ${{ env.ANDROID_VERSION }} | awk '{print int($0)}')
-      #     if [ ANDROID_VER_INT -eq 10 ] || [ $ANDROID_VER_INT -eq 11 ]; then
-      #         VERSION_PARAMS="KBUILD_CFLAGS+=-Wno-error=deprecated-declarations KBUILD_CFLAGS+=-Wno-error=unused-const-variable"
-      #         echo "ANDROID_VERSION=$ANDROID_VERSION" >> $GITHUB_ENV || echo "⚠️ 写入 ANDROID_VERSION 失败"
-      #     elif [ ${{ env.ANDROID_VERSION }} -ge 12 ]; then
-      #         VERSION_PARAMS="KBUILD_CFLAGS+=-Wno-error=unused-but-set-variable KBUILD_CFLAGS+=-Wno-error=incompatible-pointer-types"
-      #         echo "ANDROID_VERSION=$ANDROID_VERSION" >> $GITHUB_ENV || echo "⚠️ 写入 ANDROID_VERSION 失败"
-      #     fi
-      #     KERNEL_VER_MAJOR=$(echo ${{ env.KERNEL_VERSION }} | cut -d. -f1 | awk '{print int($0)}')
-      #     echo "KERNEL_VER_MAJOR=$KERNEL_VER_MAJOR" >> $GITHUB_ENV || echo "⚠️ 写入 KERNEL_VER_MAJOR 失败"
-      #     KERNEL_VER_MINOR=$(echo ${{ env.KERNEL_VERSION }} | cut -d. -f2 | awk '{print int($0)}')
-      #     echo "KERNEL_VER_MINOR=$KERNEL_VER_MINOR" >> $GITHUB_ENV || echo "⚠️ 写入 KERNEL_VER_MINOR 失败"
-      #     if [ $KERNEL_VER_MAJOR -ge 5 ] || [ $KERNEL_VER_MINOR -ge 10 ]; then
-      #         if [ -n "$VERSION_PARAMS" ]; then
-      #             VERSION_PARAMS="$VERSION_PARAMS CONFIG_LTO_CLANG=y"
-      #             echo "VERSION_PARAMS=$VERSION_PARAMS" >> $GITHUB_ENV || echo "⚠️ 写入 VERSION_PARAMS 失败"
-      #         else
-      #             VERSION_PARAMS="CONFIG_LTO_CLANG=y"
-      #             echo "VERSION_PARAMS=$VERSION_PARAMS" >> $GITHUB_ENV || echo "⚠️ 写入 VERSION_PARAMS 失败"
-      #         fi
-      #     fi
-      #     echo "VERSION_PARAMS=$VERSION_PARAMS" >> $GITHUB_ENV || echo "⚠️ 写入 VERSION_PARAMS 失败"
-      # fi
-      # echo "⚠️ USE_VERSION_PARAMS_CONFIG 已执行"
-      # if [ ${{ env.ENABLE_KVM }} = true ]; then
-      #     echo "CONFIG_KVM=y" >> arch/${{ env.ARCH }}/configs/${{ env.KERNEL_CONFIG }} || echo "⚠️ 开启 CONFIG_KVM 失败"
-      #     echo "CONFIG_KVM_ARM64=y" >> arch/${{ env.ARCH }}/configs/${{ env.KERNEL_CONFIG }} || echo "⚠️ 开启 CONFIG_KVM_ARM64 失败"
-      # else
-      #     sed -i 's/CONFIG_KVM=y/CONFIG_KVM=n/g' arch/${{ env.ARCH }}/configs/${{ env.KERNEL_CONFIG }} 2>/dev/null
-      #     sed -i 's/CONFIG_KVM_ARM64=y/CONFIG_KVM_ARM64=n/g' arch/${{ env.ARCH }}/configs/${{ env.KERNEL_CONFIG }} 2>/dev/null
-      #     echo "CONFIG_KVM=n" >> arch/${{ env.ARCH }}/configs/${{ env.KERNEL_CONFIG }} || echo "⚠️ 关闭 CONFIG_KVM 失败"
-      # fi
-      # echo "⚠️ ENABLE_KVM 已执行"
-      # if [ ${{ env.DISABLE_STACK_PROTECTOR }} = true ]; then
-      #     echo "🔍 禁用栈保护配置（适配 Clang 兼容性）"
-      #     sed -i 's/CONFIG_CC_STACKPROTECTOR_STRONG=y/# CONFIG_CC_STACKPROTECTOR_STRONG is not set/g' arch/${{ env.ARCH }}/configs/${{ env.KERNEL_CONFIG }}
-      #     sed -i 's/CONFIG_CC_STACKPROTECTOR=y/# CONFIG_CC_STACKPROTECTOR is not set/g' arch/${{ env.ARCH }}/configs/${{ env.KERNEL_CONFIG }}
-      #     echo "✅ 栈保护配置修复完成"
-      # else
-      #     echo "🔍 保留默认栈保护配置"
-      # fi
-      # if [ ${{ env.PLATFORM_QUALCOMM }} = true ]; then
-      #     echo "✅ 启用 【骁龙平台】 专属配置"
-      #     sed -i 's/CONFIG_MTK_.*=y//g' arch/${{ env.ARCH }}/configs/${{ env.KERNEL_CONFIG }} 2>/dev/null
-      #     sed -i '/CONFIG_MTK_/d' arch/${{ env.ARCH }}/configs/${{ env.KERNEL_CONFIG }} 2>/dev/null
-      #     echo "CONFIG_QCOM_SCM=y" >> arch/${{ env.ARCH }}/configs/${{ env.KERNEL_CONFIG }} || echo "⚠️ 写入 CONFIG_QCOM_SCM 失败"
-      #     echo "CONFIG_QCOM_CLK=y" >> arch/${{ env.ARCH }}/configs/${{ env.KERNEL_CONFIG }} || echo "⚠️ 写入 CONFIG_QCOM_CLK 失败"
-      #     echo "CONFIG_QCOM_SPMI=y" >> arch/${{ env.ARCH }}/configs/${{ env.KERNEL_CONFIG }} || echo "⚠️ 写入 CONFIG_QCOM_SPMI 失败"
-      #     echo "CONFIG_MSM_SLEEP=y" >> arch/${{ env.ARCH }}/configs/${{ env.KERNEL_CONFIG }} || echo "⚠️ 写入 CONFIG_MSM_SLEEP 失败"
-      #     echo "CONFIG_QCOM_RTP=y" >> arch/${{ env.ARCH }}/configs/${{ env.KERNEL_CONFIG }} || echo "⚠️ 写入 CONFIG_QCOM_RTP 失败"
-      #     echo "CONFIG_QCOM_SPSS=y" >> arch/${{ env.ARCH }}/configs/${{ env.KERNEL_CONFIG }} || echo "⚠️ 写入 CONFIG_QCOM_SPSS 失败"
-      #     echo "CONFIG_QCOM_CLK_V2=y" >> arch/${{ env.ARCH }}/configs/${{ env.KERNEL_CONFIG }} || echo "⚠️ 写入 CONFIG_QCOM_CLK_V2 失败"
-      # fi
-      # if [ "${{ env.PLATFORM_MEDIATEK }}" = "true" ]; then
-      #     echo "✅ 启用 【联发科平台】 专属配置"
-      #     sed -i 's/CONFIG_QCOM_.*=y//g' arch/${{ env.ARCH }}/configs/${{ env.KERNEL_CONFIG }} 2>/dev/null
-      #     sed -i '/CONFIG_QCOM_/d' arch/${{ env.ARCH }}/configs/${{ env.KERNEL_CONFIG }} 2>/dev/null
-      #     echo "CONFIG_MTK_EMI=y" >> arch/${{ env.ARCH }}/configs/${{ env.KERNEL_CONFIG }} || echo "⚠️ 写入 CONFIG_MTK_EMI 失败"
-      #     echo "CONFIG_MTK_PMIC=y" >> arch/${{ env.ARCH }}/configs/${{ env.KERNEL_CONFIG }} || echo "⚠️ 写入 CONFIG_MTK_PMIC 失败"
-      #     echo "CONFIG_MTK_CLKMGR=y" >> arch/${{ env.ARCH }}/configs/${{ env.KERNEL_CONFIG }} || echo "⚠️ 写入 CONFIG_MTK_CLKMGR 失败"
-      #     echo "CONFIG_MTK_COMBO=y" >> arch/${{ env.ARCH }}/configs/${{ env.KERNEL_CONFIG }} || echo "⚠️ 写入 CONFIG_MTK_COMBO 失败"
-      #     echo "CONFIG_MTK_NFC_SUPPORT=y" >> arch/${{ env.ARCH }}/configs/${{ env.KERNEL_CONFIG }} || echo "⚠️ 写入 CONFIG_MTK_NFC_SUPPORT 失败"
-      #     echo "CONFIG_MTK_DRV=y" >> arch/${{ env.ARCH }}/configs/${{ env.KERNEL_CONFIG }} || echo "⚠️ 写入 CONFIG_MTK_DRV 失败"
-      #     echo "CONFIG_MTK_BOOT=y" >> arch/${{ env.ARCH }}/configs/${{ env.KERNEL_CONFIG }} || echo "⚠️ 写入 CONFIG_MTK_BOOT 失败"
-      #     echo "CONFIG_MTK_FB=y" >> arch/${{ env.ARCH }}/configs/${{ env.KERNEL_CONFIG }} || echo "⚠️ 写入 CONFIG_MTK_FB 失败"
-      #     echo "CONFIG_MTK_GPU=y" >> arch/${{ env.ARCH }}/configs/${{ env.KERNEL_CONFIG }} || echo "⚠️ 写入 CONFIG_MTK_GPU 失败"
-      #     sed -i 's/CONFIG_MTK_NFC_CLKBUF_ENABLE=y/CONFIG_MTK_NFC_CLKBUF_ENABLE=m/g' arch/${{ env.ARCH }}/configs/${{ env.KERNEL_CONFIG }} 2>/dev/null
-      # fi
-      # if [ ${{ env.SWITCH_PYTHON }} = true ]; then
-      #     update-alternatives --set python /usr/bin/python2 2>/dev/null
-      #     export PYTHON=/usr/bin/python2
-      # else
-      #     update-alternatives --set python /usr/bin/python3 2>/dev/null
-      #     export PYTHON=/usr/bin/python3
-      # fi
+        cd $GITHUB_WORKSPACE/kernel_workspace/android-kernel
+        if [ ${{ env.APPLY_KSU_PATCH }} = true ]; then
+            echo "当前目录：$(pwd)"
+            bash $GITHUB_WORKSPACE/patches/patches.sh || echo "patches.sh 执行失败，但继续"
+            if grep -q "CONFIG_KSU" arch/${{ env.ARCH }}/configs/${{ env.KERNEL_CONFIG }}; then
+                sed -i 's/# CONFIG_KSU is not set/CONFIG_KSU=y/g' arch/${{ env.ARCH }}/configs/${{ env.KERNEL_CONFIG }}
+                sed -i 's/CONFIG_KSU=n/CONFIG_KSU=y/g' arch/${{ env.ARCH }}/configs/${{ env.KERNEL_CONFIG }}
+            else
+                echo "CONFIG_KSU=y" >> arch/${{ env.ARCH }}/configs/${{ env.KERNEL_CONFIG }} || echo "⚠️ 开启 CONFIG_KSU 失败"
+            fi
+            echo "✅ 已应用 KSU 补丁并开启 CONFIG_KSU"
+        elif [ ${{ env.APPLY_KSU_PATCH }} = false ]; then
+            echo "⚠️ 配置目录 $(pwd)"
+            if grep -q "CONFIG_KSU" arch/${{ env.ARCH }}/configs/${{ env.KERNEL_CONFIG }}; then
+                sed -i 's/CONFIG_KSU=y/CONFIG_KSU=n/g' arch/${{ env.ARCH }}/configs/${{ env.KERNEL_CONFIG }}
+                sed -i 's/# CONFIG_KSU is not set/CONFIG_KSU=n/g' arch/${{ env.ARCH }}/configs/${{ env.KERNEL_CONFIG }}
+            else
+                echo "CONFIG_KSU=n" >> arch/${{ env.ARCH }}/configs/${{ env.KERNEL_CONFIG }} || echo "⚠️ 关闭 CONFIG_KSU 失败"
+            fi
+            echo "✅ 已关闭 CONFIG_KSU"
+        else
+            echo "🔍 保持默认 KSU 配置"
+        fi
+        echo "⚠️ APPLY_KSU_PATCH 已执行"
+        if [ ${{ env.ADD_KPROBES_CONFIG }} = true -a ${{ env.APPLY_KSU_PATCH }} != true ]; then
+            echo "CONFIG_MODULES=y" >> arch/${{ env.ARCH }}/configs/${{ env.KERNEL_CONFIG }} || echo "⚠️ 开启 MODULES 失败"
+            echo "CONFIG_KPROBES=y" >> arch/${{ env.ARCH }}/configs/${{ env.KERNEL_CONFIG }} || echo "⚠️ 开启 CONFIG_KPROBES 失败"
+            echo "CONFIG_HAVE_KPROBES=y" >> arch/${{ env.ARCH }}/configs/${{ env.KERNEL_CONFIG }} || echo "⚠️ 开启 CONFIG_HAVE_KPROBES 失败"
+            echo "CONFIG_KPROBE_EVENTS=y" >> arch/${{ env.ARCH }}/configs/${{ env.KERNEL_CONFIG }} || echo "⚠️ 开启 CONFIG_KPROBE_EVENTS 失败"
+            echo "✅ 已启用 kprobes 相关配置"
+        elif [ ${{ env.ADD_KPROBES_CONFIG }} = false ]; then
+            echo "CONFIG_MODULES=n" >> arch/${{ env.ARCH }}/configs/${{ env.KERNEL_CONFIG }} || echo "⚠️ 关闭 MODULES 失败"
+            echo "CONFIG_KPROBES=n" >> arch/${{ env.ARCH }}/configs/${{ env.KERNEL_CONFIG }} || echo "⚠️ 关闭 CONFIG_KPROBES 失败"
+            echo "CONFIG_HAVE_KPROBES=n" >> arch/${{ env.ARCH }}/configs/${{ env.KERNEL_CONFIG }} || echo "⚠️ 关闭 CONFIG_HAVE_KPROBES 失败"
+            echo "CONFIG_KPROBE_EVENTS=n" >> arch/${{ env.ARCH }}/configs/${{ env.KERNEL_CONFIG }} || echo "⚠️ 关闭 CONFIG_KPROBE_EVENTS 失败"
+            echo "✅ 已关闭 kprobes 相关配置"
+        else
+            echo "🔍 保持默认 kprobes 配置"
+        fi
+        echo "⚠️ ADD_KPROBES_CONFIG 已执行"
+        if [ ${{ env.ADD_OVERLAYFS_CONFIG }} = true ]; then
+        echo "CONFIG_OVERLAY_FS=y" >> arch/${{ env.ARCH }}/configs/${{ env.KERNEL_CONFIG }} || echo "⚠️ 开启 CONFIG_OVERLAY_FS 失败"
+            echo "✅ 已启用 OverlayFS"
+        elif [ ${{ env.ADD_OVERLAYFS_CONFIG }} = false ]; then
+            echo "CONFIG_OVERLAY_FS=n" >> arch/${{ env.ARCH }}/configs/${{ env.KERNEL_CONFIG }} || echo "⚠️ 关闭 CONFIG_OVERLAY_FS 失败"
+            echo "✅ 已禁用 OverlayFS"
+        else
+            echo "🔍 保持默认 OverlayFS 配置"
+        fi
+        echo "⚠️ ADD_OVERLAYFS_CONFIG 已执行"
+        if [ ${{ env.DISABLE_LTO }} = true ]; then
+            sed -i 's/CONFIG_LTO=n/CONFIG_LTO=y/' arch/${{ env.ARCH }}/configs/${{ env.KERNEL_CONFIG }}
+            sed -i 's/CONFIG_LTO_CLANG=n/CONFIG_LTO_CLANG=y/' arch/${{ env.ARCH }}/configs/${{ env.KERNEL_CONFIG }}
+            sed -i 's/CONFIG_THINLTO=n/CONFIG_THINLTO=y/' arch/${{ env.ARCH }}/configs/${{ env.KERNEL_CONFIG }}
+            echo "CONFIG_LTO_NONE=n" >> arch/${{ env.ARCH }}/configs/${{ env.KERNEL_CONFIG }} || echo "⚠️ 启用 LTO 优化失败"
+            echo "✅ 已启用 LTO 优化"
+        elif [ ${{ env.DISABLE_LTO }} = false ]; then
+            sed -i 's/CONFIG_LTO=y/CONFIG_LTO=n/' arch/${{ env.ARCH }}/configs/${{ env.KERNEL_CONFIG }}
+            sed -i 's/CONFIG_LTO_CLANG=y/CONFIG_LTO_CLANG=n/' arch/${{ env.ARCH }}/configs/${{ env.KERNEL_CONFIG }}
+            sed -i 's/CONFIG_THINLTO=y/CONFIG_THINLTO=n/' arch/${{ env.ARCH }}/configs/${{ env.KERNEL_CONFIG }}
+            echo "CONFIG_LTO_NONE=y" >> arch/${{ env.ARCH }}/configs/${{ env.KERNEL_CONFIG }} || echo "⚠️ 禁用 LTO 优化失败"
+            echo "✅ 已禁用 LTO 优化"
+        else
+            echo "🔍 保持默认 LTO 配置"
+        fi
+        echo "⚠️ DISABLE_LTO 已执行"
+        if [ ${{ env.DISABLE_CC_WERROR }} = true ]; then
+            echo "CONFIG_CC_WERROR=y" >> arch/${{ env.ARCH }}/configs/${{ env.KERNEL_CONFIG }} || echo "⚠️ 开启错误警告失败"
+            echo "✅ 已开启内核错误警告"
+        elif [ ${{ env.DISABLE_CC_WERROR }} = false ]; then
+            echo "CONFIG_CC_WERROR=n" >> arch/${{ env.ARCH }}/configs/${{ env.KERNEL_CONFIG }} || echo "⚠️ 关闭错误警告失败"
+            echo "✅ 已关闭内核错误警告"
+        else
+            echo "🔍 保持默认错误警告配置"
+        fi
+        echo "⚠️ DISABLE_CC_WERROR 已执行"
+        if [ ${{ env.LLVM_CONFIG }} = true ]; then
+            LLVM_PARAMS="LLVM=1 LLVM_IAS=1 AR=llvm-ar NM=llvm-nm OBJCOPY=llvm-objcopy OBJDUMP=llvm-objdump STRIP=llvm-strip"
+            echo "LLVM_PARAMS=$LLVM_PARAMS" >> $GITHUB_ENV || echo "⚠️ 写入 LLVM_PARAMS 失败"
+        fi
+        echo '$LLVM_PARAMS'
+        echo "⚠️ 配置目录 LLVM_CONFIG 已执行 "$LLVM_PARAMS" "
+        if [ ${{ env.USE_VERSION_PARAMS_CONFIG }} = false ]; then
+            ANDROID_VER_INT=$(echo ${{ env.ANDROID_VERSION }} | awk '{print int($0)}')
+            if [ ANDROID_VER_INT -eq 10 ] || [ $ANDROID_VER_INT -eq 11 ]; then
+                VERSION_PARAMS="KBUILD_CFLAGS+=-Wno-error=deprecated-declarations KBUILD_CFLAGS+=-Wno-error=unused-const-variable"
+                echo "ANDROID_VERSION=$ANDROID_VERSION" >> $GITHUB_ENV || echo "⚠️ 写入 ANDROID_VERSION 失败"
+            elif [ ${{ env.ANDROID_VERSION }} -ge 12 ]; then
+                VERSION_PARAMS="KBUILD_CFLAGS+=-Wno-error=unused-but-set-variable KBUILD_CFLAGS+=-Wno-error=incompatible-pointer-types"
+                echo "ANDROID_VERSION=$ANDROID_VERSION" >> $GITHUB_ENV || echo "⚠️ 写入 ANDROID_VERSION 失败"
+            fi
+            KERNEL_VER_MAJOR=$(echo ${{ env.KERNEL_VERSION }} | cut -d. -f1 | awk '{print int($0)}')
+            echo "KERNEL_VER_MAJOR=$KERNEL_VER_MAJOR" >> $GITHUB_ENV || echo "⚠️ 写入 KERNEL_VER_MAJOR 失败"
+            KERNEL_VER_MINOR=$(echo ${{ env.KERNEL_VERSION }} | cut -d. -f2 | awk '{print int($0)}')
+            echo "KERNEL_VER_MINOR=$KERNEL_VER_MINOR" >> $GITHUB_ENV || echo "⚠️ 写入 KERNEL_VER_MINOR 失败"
+            if [ $KERNEL_VER_MAJOR -ge 5 ] || [ $KERNEL_VER_MINOR -ge 10 ]; then
+                if [ -n "$VERSION_PARAMS" ]; then
+                    VERSION_PARAMS="$VERSION_PARAMS CONFIG_LTO_CLANG=y"
+                    echo "VERSION_PARAMS=$VERSION_PARAMS" >> $GITHUB_ENV || echo "⚠️ 写入 VERSION_PARAMS 失败"
+                else
+                    VERSION_PARAMS="CONFIG_LTO_CLANG=y"
+                    echo "VERSION_PARAMS=$VERSION_PARAMS" >> $GITHUB_ENV || echo "⚠️ 写入 VERSION_PARAMS 失败"
+                fi
+            fi
+            echo "VERSION_PARAMS=$VERSION_PARAMS" >> $GITHUB_ENV || echo "⚠️ 写入 VERSION_PARAMS 失败"
+        fi
+        echo "⚠️ USE_VERSION_PARAMS_CONFIG 已执行"
+        if [ ${{ env.USE_ENABLE_KVM }} = true ]; then
+            echo "CONFIG_KVM=y" >> arch/${{ env.ARCH }}/configs/${{ env.KERNEL_CONFIG }}
+            echo "CONFIG_KVM_ARM64=y" >> arch/${{ env.ARCH }}/configs/${{ env.KERNEL_CONFIG }}
+        elif [ ${{ env.USE_ENABLE_KVM }} = false ]; then
+            sed -i 's/CONFIG_KVM=y/CONFIG_KVM=n/g' arch/${{ env.ARCH }}/configs/${{ env.KERNEL_CONFIG }} 2>/dev/null
+            sed -i 's/CONFIG_KVM_ARM64=y/CONFIG_KVM_ARM64=n/g' arch/${{ env.ARCH }}/configs/${{ env.KERNEL_CONFIG }} 2>/dev/null
+            echo "CONFIG_KVM=n" >> arch/${{ env.ARCH }}/configs/${{ env.KERNEL_CONFIG }}
+        else
+            echo "✅ USE_ENABLE_KVM 未配置，保持内核默认 KVM 状态"
+        fi
+        echo "⚠️ USE_ENABLE_KVM 已执行"
+        if [ ${{ env.DISABLE_STACK_PROTECTOR }} = true ]; then
+            echo "🔍 启用栈保护配置"
+            sed -i 's/# CONFIG_CC_STACKPROTECTOR_STRONG is not set/CONFIG_CC_STACKPROTECTOR_STRONG=y/g' arch/${{ env.ARCH }}/configs/${{ env.KERNEL_CONFIG }}
+            sed -i 's/# CONFIG_CC_STACKPROTECTOR is not set/CONFIG_CC_STACKPROTECTOR=y/g' arch/${{ env.ARCH }}/configs/${{ env.KERNEL_CONFIG }}
+            echo "✅ 栈保护已启用"
+        elif [ ${{ env.DISABLE_STACK_PROTECTOR }} = false ]; then
+            echo "🔍 禁用栈保护配置（适配 Clang 兼容性）"
+            sed -i 's/CONFIG_CC_STACKPROTECTOR_STRONG=y/# CONFIG_CC_STACKPROTECTOR_STRONG is not set/g' arch/${{ env.ARCH }}/configs/${{ env.KERNEL_CONFIG }}
+            sed -i 's/CONFIG_CC_STACKPROTECTOR=y/# CONFIG_CC_STACKPROTECTOR is not set/g' arch/${{ env.ARCH }}/configs/${{ env.KERNEL_CONFIG }}
+            echo "✅ 栈保护已禁用"
+        else
+            echo "🔍 保留默认栈保护配置"
+        fi
+        if [ ${{ env.Device_Processor_Selection }} = true ]; then
+            echo "✅ 启用 【骁龙平台】 专属配置"
+            sed -i 's/CONFIG_MTK_.*=y//g' arch/${{ env.ARCH }}/configs/${{ env.KERNEL_CONFIG }} 2>/dev/null
+            sed -i '/CONFIG_MTK_/d' arch/${{ env.ARCH }}/configs/${{ env.KERNEL_CONFIG }} 2>/dev/null
+            echo "CONFIG_QCOM_SCM=y" >> arch/${{ env.ARCH }}/configs/${{ env.KERNEL_CONFIG }} || echo "⚠️ 写入 CONFIG_QCOM_SCM 失败"
+            echo "CONFIG_QCOM_CLK=y" >> arch/${{ env.ARCH }}/configs/${{ env.KERNEL_CONFIG }} || echo "⚠️ 写入 CONFIG_QCOM_CLK 失败"
+            echo "CONFIG_QCOM_SPMI=y" >> arch/${{ env.ARCH }}/configs/${{ env.KERNEL_CONFIG }} || echo "⚠️ 写入 CONFIG_QCOM_SPMI 失败"
+            echo "CONFIG_MSM_SLEEP=y" >> arch/${{ env.ARCH }}/configs/${{ env.KERNEL_CONFIG }} || echo "⚠️ 写入 CONFIG_MSM_SLEEP 失败"
+            echo "CONFIG_QCOM_RTP=y" >> arch/${{ env.ARCH }}/configs/${{ env.KERNEL_CONFIG }} || echo "⚠️ 写入 CONFIG_QCOM_RTP 失败"
+            echo "CONFIG_QCOM_SPSS=y" >> arch/${{ env.ARCH }}/configs/${{ env.KERNEL_CONFIG }} || echo "⚠️ 写入 CONFIG_QCOM_SPSS 失败"
+            echo "CONFIG_QCOM_CLK_V2=y" >> arch/${{ env.ARCH }}/configs/${{ env.KERNEL_CONFIG }} || echo "⚠️ 写入 CONFIG_QCOM_CLK_V2 失败"
+        elif [ ${{ env.Device_Processor_Selection }} = false ]; then
+            echo "✅ 启用 【联发科平台】 专属配置"
+            sed -i 's/CONFIG_QCOM_.*=y//g' arch/${{ env.ARCH }}/configs/${{ env.KERNEL_CONFIG }} 2>/dev/null
+            sed -i '/CONFIG_QCOM_/d' arch/${{ env.ARCH }}/configs/${{ env.KERNEL_CONFIG }} 2>/dev/null
+            echo "CONFIG_MTK_EMI=y" >> arch/${{ env.ARCH }}/configs/${{ env.KERNEL_CONFIG }} || echo "⚠️ 写入 CONFIG_MTK_EMI 失败"
+            echo "CONFIG_MTK_PMIC=y" >> arch/${{ env.ARCH }}/configs/${{ env.KERNEL_CONFIG }} || echo "⚠️ 写入 CONFIG_MTK_PMIC 失败"
+            echo "CONFIG_MTK_CLKMGR=y" >> arch/${{ env.ARCH }}/configs/${{ env.KERNEL_CONFIG }} || echo "⚠️ 写入 CONFIG_MTK_CLKMGR 失败"
+            echo "CONFIG_MTK_COMBO=y" >> arch/${{ env.ARCH }}/configs/${{ env.KERNEL_CONFIG }} || echo "⚠️ 写入 CONFIG_MTK_COMBO 失败"
+            echo "CONFIG_MTK_NFC_SUPPORT=y" >> arch/${{ env.ARCH }}/configs/${{ env.KERNEL_CONFIG }} || echo "⚠️ 写入 CONFIG_MTK_NFC_SUPPORT 失败"
+            echo "CONFIG_MTK_DRV=y" >> arch/${{ env.ARCH }}/configs/${{ env.KERNEL_CONFIG }} || echo "⚠️ 写入 CONFIG_MTK_DRV 失败"
+            echo "CONFIG_MTK_BOOT=y" >> arch/${{ env.ARCH }}/configs/${{ env.KERNEL_CONFIG }} || echo "⚠️ 写入 CONFIG_MTK_BOOT 失败"
+            echo "CONFIG_MTK_FB=y" >> arch/${{ env.ARCH }}/configs/${{ env.KERNEL_CONFIG }} || echo "⚠️ 写入 CONFIG_MTK_FB 失败"
+            echo "CONFIG_MTK_GPU=y" >> arch/${{ env.ARCH }}/configs/${{ env.KERNEL_CONFIG }} || echo "⚠️ 写入 CONFIG_MTK_GPU 失败"
+            sed -i 's/CONFIG_MTK_NFC_CLKBUF_ENABLE=y/CONFIG_MTK_NFC_CLKBUF_ENABLE=m/g' arch/${{ env.ARCH }}/configs/${{ env.KERNEL_CONFIG }} 2>/dev/null
+        else
+            echo "🔍 未选择平台，保持默认内核配置"
+        fi
+        if [ ${{ env.SWITCH_PYTHON }} = true ]; then
+            update-alternatives --set python /usr/bin/python3 2>/dev/null
+            export PYTHON=/usr/bin/python3
+            echo "✅ Python 已切换到 python3"
+        elif [ ${{ env.SWITCH_PYTHON }} = false ]; then
+            update-alternatives --set python /usr/bin/python2 2>/dev/null
+            export PYTHON=/usr/bin/python2
+            echo "✅ Python 已切换到 python2"
+        else
+            echo "🔍 保持默认python配置"
+        fi
 
     - name: Setup ccache
       if: env.ENABLE_CCACHE == 'true'
