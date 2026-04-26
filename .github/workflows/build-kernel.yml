@@ -469,7 +469,6 @@ jobs:
     - name: Build kernel
       run: |
         cd $GITHUB_WORKSPACE/kernel_workspace/android-kernel
-        unset false
         echo "==================== 调试输出 ===================="
         echo "KBUILD_BUILD_USER=$KBUILD_BUILD_USER"
         echo "KBUILD_BUILD_HOST=$KBUILD_BUILD_HOST"
@@ -479,14 +478,6 @@ jobs:
         echo "CUSTOM_CMDS = '${{ env.CUSTOM_CMDS }}'"
         echo "EXTRA_CMDS  = '${{ env.EXTRA_CMDS }}'"
         echo "==================================================="
-        unset LD
-        unset AS
-        unset CC
-        unset CROSS_COMPILE
-        unset CROSS_COMPILE_ARM32
-        unset CLANG_TRIPLE
-        unset EXTRA_CMDS
-        unset false
         export PATH=$GITHUB_WORKSPACE/kernel_workspace/clang-aosp/bin:$PATH
         export KBUILD_BUILD_HOST=Github-Action
         export KBUILD_BUILD_USER=$(echo ${{ github.actor }} | tr A-Z a-z)
