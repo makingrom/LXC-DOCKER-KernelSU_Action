@@ -358,7 +358,7 @@ jobs:
         else
             echo "🔍 保持默认 LTO 配置"
         fi
-        if [ "${{ env.DISABLE_CC_WERROR }}" = "true" ]; then
+        if [ "{{ env.DISABLE_CC_WERROR }}" = "true" ]; then
             echo "CONFIG_CC_WERROR=y" >> arch/${{ env.ARCH }}/configs/${{ env.KERNEL_CONFIG }} || echo "⚠️ 开启错误警告失败"
             echo "✅ 已开启内核错误警告"
         elif [ "${{ env.DISABLE_CC_WERROR }}" = "false" ]; then
@@ -371,8 +371,8 @@ jobs:
             LLVM_PARAMS="LLVM=1 LLVM_IAS=1 AR=llvm-ar NM=llvm-nm OBJCOPY=llvm-objcopy OBJDUMP=llvm-objdump STRIP=llvm-strip"
             echo "LLVM_PARAMS=$LLVM_PARAMS" >> $GITHUB_ENV || echo "⚠️ 写入 LLVM_PARAMS 失败"
         fi
-        echo '$LLVM_PARAMS'
         if [ "${{ env.USE_VERSION_PARAMS_CONFIG }}" = "false" ]; then
+            echo "开始处理版本信息..."
             ANDROID_VER_INT=$(echo ${{ env.ANDROID_VERSION }} | awk '{print int($0)}')
             if [ "$ANDROID_VER_INT" -eq 10 ] || [ "$ANDROID_VER_INT" -eq 11 ]; then
                 VERSION_PARAMS="KBUILD_CFLAGS+=-Wno-error=deprecated-declarations KBUILD_CFLAGS+=-Wno-error=unused-const-variable"
@@ -395,14 +395,17 @@ jobs:
                 fi
             fi
             echo "VERSION_PARAMS=$VERSION_PARAMS" >> $GITHUB_ENV || echo "⚠️ 写入 VERSION_PARAMS 失败"
+            echo " VERSION_PARAMS 已赋值..."
         fi
         if [ "${{ env.USE_ENABLE_KVM }}" = "true" ]; then
             echo "CONFIG_KVM=y" >> arch/${{ env.ARCH }}/configs/${{ env.KERNEL_CONFIG }}
             echo "CONFIG_KVM_ARM64=y" >> arch/${{ env.ARCH }}/configs/${{ env.KERNEL_CONFIG }}
+            echo "✅ KVM 已开启"
         elif [ "${{ env.USE_ENABLE_KVM }}" = "false" ]; then
             sed -i 's/CONFIG_KVM=y/CONFIG_KVM=n/g' arch/${{ env.ARCH }}/configs/${{ env.KERNEL_CONFIG }} 2>/dev/null
             sed -i 's/CONFIG_KVM_ARM64=y/CONFIG_KVM_ARM64=n/g' arch/${{ env.ARCH }}/configs/${{ env.KERNEL_CONFIG }} 2>/dev/null
             echo "CONFIG_KVM=n" >> arch/${{ env.ARCH }}/configs/${{ env.KERNEL_CONFIG }}
+            echo "✅ KVM 已关闭"
         else
             echo "✅ USE_ENABLE_KVM 未配置，保持内核默认 KVM 状态"
         fi
