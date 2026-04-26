@@ -485,17 +485,41 @@ jobs:
         echo "KBUILD_BUILD_USER=$KBUILD_BUILD_USER"
         echo "KBUILD_BUILD_HOST=$KBUILD_BUILD_HOST"
         echo "==================================================="
+        export CC="clang -no-integrated-as"
+        export AS=clang
+        export LD=ld.lld
+        export NM=llvm-nm
+        export OBJCOPY=llvm-objcopy
+        export OBJDUMP=llvm-objdump
+        export READELF=llvm-readelf
+        export STRIP=llvm-strip
+        export LLVM_AR=llvm-ar
+        export LLVM_AS=llvm-as
+        
         if [ ! -z ${{ env.KSU_EXPECTED_SIZE }} ] && [ ! -z ${{ env.KSU_EXPECTED_HASH }} ]; then
           export KSU_EXPECTED_SIZE=${{ env.KSU_EXPECTED_SIZE }}
           export KSU_EXPECTED_HASH=${{ env.KSU_EXPECTED_HASH }}
         fi
         
-        make -j$(nproc --all) CC=clang O=out ARCH=${{ env.ARCH }} ${{ env.CUSTOM_CMDS }} ${{ env.EXTRA_CMDS }} ${{ env.GCC_64 }} ${{ env.GCC_32 }} ${{ env.KERNEL_CONFIG }}
-        if [ ${{ env.ENABLE_CCACHE }} = true ]; then
-            make -j$(nproc --all) CC="ccache clang" O=out ARCH=${{ env.ARCH }} ${{ env.CUSTOM_CMDS }} ${{ env.EXTRA_CMDS }} ${{ env.GCC_64 }} ${{ env.GCC_32 }}
+        ARCH="${{ env.ARCH }}"
+        GCC64="${{ env.GCC_64 }}"
+        GCC32="${{ env.GCC_32 }}"
+        KERNEL_CFG="${{ env.KERNEL_CONFIG }}"
+
+        make -j$(nproc --all) CC=clang O=out ARCH=$ARCH $GCC64 $GCC32 $KERNEL_CFG
+        if [ "${{ env.ENABLE_CCACHE }}" = "true" ]; then
+            make -j$(nproc --all) CC="ccache clang" O=out ARCH=$ARCH $GCC64 $GCC32
         else
-            make -j$(nproc --all) CC=clang O=out ARCH=${{ env.ARCH }} ${{ env.CUSTOM_CMDS }} ${{ env.EXTRA_CMDS }} ${{ env.GCC_64 }} ${{ env.GCC_32 }}
+            make -j$(nproc --all) CC=clang O=out ARCH=$ARCH $GCC64 $GCC32
         fi
+
+        
+      # make -j$(nproc --all) CC=clang O=out ARCH=${{ env.ARCH }} ${{ env.CUSTOM_CMDS }} ${{ env.EXTRA_CMDS }} ${{ env.GCC_64 }} ${{ env.GCC_32 }} ${{ env.KERNEL_CONFIG }}
+      # if [ ${{ env.ENABLE_CCACHE }} = true ]; then
+      #     make -j$(nproc --all) CC="ccache clang" O=out ARCH=${{ env.ARCH }} ${{ env.CUSTOM_CMDS }} ${{ env.EXTRA_CMDS }} ${{ env.GCC_64 }} ${{ env.GCC_32 }}
+      # else
+      #     make -j$(nproc --all) CC=clang O=out ARCH=${{ env.ARCH }} ${{ env.CUSTOM_CMDS }} ${{ env.EXTRA_CMDS }} ${{ env.GCC_64 }} ${{ env.GCC_32 }}
+      # fi
 
       # make -j$(nproc --all) CC=clang O=out ARCH=${{ env.ARCH }} ${{ env.CUSTOM_CMDS }} ${{ env.EXTRA_CMDS }} ${{ env.GCC_64 }} ${{ env.GCC_32 }} ${{ env.KERNEL_CONFIG }}
       # if [ ${{ env.ENABLE_CCACHE }} = true ]; then
