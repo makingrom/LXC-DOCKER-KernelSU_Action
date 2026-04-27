@@ -108,5 +108,5 @@ for i in "${patch_files[@]}"; do
         sed -i '/int disposition = input_get_disposition(dev, type, code, &value);/a\	#ifdef CONFIG_KSU\n	if (unlikely(ksu_input_hook))\n		ksu_handle_input_handle_event(&type, &code, &value);\n	#endif' drivers/input/input.c
         ;;
     esac
-
+    
 done
