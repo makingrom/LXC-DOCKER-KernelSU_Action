@@ -48,7 +48,7 @@ jobs:
             CUSTOM_ANYKERNEL3_BRANCH
             DISABLE_STACK_PROTECTOR
 
-            DISABLE_LTO
+            OPEN_DISABLE_LTO
             DISABLE_CC_WERROR
             ADD_KPROBES_CONFIG
             ADD_OVERLAYFS_CONFIG
