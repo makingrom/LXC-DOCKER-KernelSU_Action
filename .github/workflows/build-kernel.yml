@@ -19,7 +19,6 @@ jobs:
             KERNEL_SOURCE
             KERNEL_SOURCE_BRANCH
             KERNEL_CONFIG
-
             KERNEL_IMAGE_NAME
             ARCH
             ADD_LOCALVERSION_TO_FILENAME
@@ -40,14 +39,11 @@ jobs:
             CUSTOM_GCC_32_BRANCH
             CUSTOM_GCC_32_BIN
             ENABLE_KERNELSU
-
             KERNELSU_TAG
-
             USE_CUSTOM_ANYKERNEL3
             CUSTOM_ANYKERNEL3_SOURCE
             CUSTOM_ANYKERNEL3_BRANCH
             DISABLE_STACK_PROTECTOR
-
             USE_DISABLE_LTO
             DISABLE_CC_WERROR
             ADD_KPROBES_CONFIG
@@ -55,13 +51,11 @@ jobs:
             APPLY_KSU_PATCH
             USE_ENABLE_KVM
             EXTRA_CMDS
-
             REMOVE_UNUSED_PACKAGES
             ENABLE_CCACHE
             NEED_DTBO
             BUILD_BOOT_IMG
             SOURCE_BOOT_IMAGE
-
             ANDROID_VERSION
             ANDROID_VER_INT
             KERNEL_VERSION
