@@ -319,13 +319,13 @@ jobs:
         else
             echo "🔍 保持默认 KSU 配置"
         fi
-        if [ "${{ env.ADD_KPROBES_CONFIG }}" = "true" -a "${{ env.APPLY_KSU_PATCH }}" != "true" ]; then
+        if [ ${{ env.ADD_KPROBES_CONFIG }} = true -a ${{ env.APPLY_KSU_PATCH }} != true ]; then
             echo "CONFIG_MODULES=y" >> arch/${{ env.ARCH }}/configs/${{ env.KERNEL_CONFIG }} || echo "⚠️ 开启 MODULES 失败"
             echo "CONFIG_KPROBES=y" >> arch/${{ env.ARCH }}/configs/${{ env.KERNEL_CONFIG }} || echo "⚠️ 开启 CONFIG_KPROBES 失败"
             echo "CONFIG_HAVE_KPROBES=y" >> arch/${{ env.ARCH }}/configs/${{ env.KERNEL_CONFIG }} || echo "⚠️ 开启 CONFIG_HAVE_KPROBES 失败"
             echo "CONFIG_KPROBE_EVENTS=y" >> arch/${{ env.ARCH }}/configs/${{ env.KERNEL_CONFIG }} || echo "⚠️ 开启 CONFIG_KPROBE_EVENTS 失败"
             echo "✅ 已启用 kprobes 相关配置"
-        elif [ "${{ env.ADD_KPROBES_CONFIG }}" = "true" ]; then
+        elif [ ${{ env.ADD_KPROBES_CONFIG }} = true ]; then
             echo "CONFIG_MODULES=n" >> arch/${{ env.ARCH }}/configs/${{ env.KERNEL_CONFIG }} || echo "⚠️ 关闭 MODULES 失败"
             echo "CONFIG_KPROBES=n" >> arch/${{ env.ARCH }}/configs/${{ env.KERNEL_CONFIG }} || echo "⚠️ 关闭 CONFIG_KPROBES 失败"
             echo "CONFIG_HAVE_KPROBES=n" >> arch/${{ env.ARCH }}/configs/${{ env.KERNEL_CONFIG }} || echo "⚠️ 关闭 CONFIG_HAVE_KPROBES 失败"
@@ -335,7 +335,7 @@ jobs:
             echo "🔍 保持默认 kprobes 配置"
         fi
         if [ "${{ env.ADD_OVERLAYFS_CONFIG }}" = "true" ]; then
-        echo "CONFIG_OVERLAY_FS=y" >> arch/${{ env.ARCH }}/configs/${{ env.KERNEL_CONFIG }} || echo "⚠️ 开启 CONFIG_OVERLAY_FS 失败"
+            echo "CONFIG_OVERLAY_FS=y" >> arch/${{ env.ARCH }}/configs/${{ env.KERNEL_CONFIG }} || echo "⚠️ 开启 CONFIG_OVERLAY_FS 失败"
             echo "✅ 已启用 OverlayFS"
         elif [ "${{ env.ADD_OVERLAYFS_CONFIG }}" = "false" ]; then
             echo "CONFIG_OVERLAY_FS=n" >> arch/${{ env.ARCH }}/configs/${{ env.KERNEL_CONFIG }} || echo "⚠️ 关闭 CONFIG_OVERLAY_FS 失败"
@@ -343,13 +343,13 @@ jobs:
         else
             echo "🔍 保持默认 OverlayFS 配置"
         fi
-        if [ "${{ env.USE_DISABLE_LTO }}" = "true" ]; then
+        if [ ${{ env.USE_DISABLE_LTO }} = true ]; then
             sed -i 's/CONFIG_LTO=n/CONFIG_LTO=y/' arch/${{ env.ARCH }}/configs/${{ env.KERNEL_CONFIG }}
             sed -i 's/CONFIG_LTO_CLANG=n/CONFIG_LTO_CLANG=y/' arch/${{ env.ARCH }}/configs/${{ env.KERNEL_CONFIG }}
             sed -i 's/CONFIG_THINLTO=n/CONFIG_THINLTO=y/' arch/${{ env.ARCH }}/configs/${{ env.KERNEL_CONFIG }}
             echo "CONFIG_LTO_NONE=n" >> arch/${{ env.ARCH }}/configs/${{ env.KERNEL_CONFIG }} || echo "⚠️ 启用 LTO 优化失败"
             echo "✅ 已启用 LTO 优化"
-        elif [ "${{ env.USE_DISABLE_LTO }}" = "false" ]; then
+        elif [ ${{ env.USE_DISABLE_LTO }} = false ]; then
             sed -i 's/CONFIG_LTO=y/CONFIG_LTO=n/' arch/${{ env.ARCH }}/configs/${{ env.KERNEL_CONFIG }}
             sed -i 's/CONFIG_LTO_CLANG=y/CONFIG_LTO_CLANG=n/' arch/${{ env.ARCH }}/configs/${{ env.KERNEL_CONFIG }}
             sed -i 's/CONFIG_THINLTO=y/CONFIG_THINLTO=n/' arch/${{ env.ARCH }}/configs/${{ env.KERNEL_CONFIG }}
@@ -358,7 +358,7 @@ jobs:
         else
             echo "🔍 保持默认 LTO 配置"
         fi
-        if [ "{{ env.DISABLE_CC_WERROR }}" = "true" ]; then
+        if [ "${{ env.DISABLE_CC_WERROR }}" = "true" ]; then
             echo "CONFIG_CC_WERROR=y" >> arch/${{ env.ARCH }}/configs/${{ env.KERNEL_CONFIG }} || echo "⚠️ 开启错误警告失败"
             echo "✅ 已开启内核错误警告"
         elif [ "${{ env.DISABLE_CC_WERROR }}" = "false" ]; then
