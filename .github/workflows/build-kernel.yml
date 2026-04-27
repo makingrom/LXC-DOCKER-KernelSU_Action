@@ -48,7 +48,7 @@ jobs:
             CUSTOM_ANYKERNEL3_BRANCH
             DISABLE_STACK_PROTECTOR
 
-            OPEN_DISABLE_LTO
+            USE_DISABLE_LTO
             DISABLE_CC_WERROR
             ADD_KPROBES_CONFIG
             ADD_OVERLAYFS_CONFIG
@@ -343,13 +343,13 @@ jobs:
         else
             echo "🔍 保持默认 OverlayFS 配置"
         fi
-        if [ "${{ env.DISABLE_LTO }}" = "true" ]; then
+        if [ "${{ env.USE_DISABLE_LTO }}" = "true" ]; then
             sed -i 's/CONFIG_LTO=n/CONFIG_LTO=y/' arch/${{ env.ARCH }}/configs/${{ env.KERNEL_CONFIG }}
             sed -i 's/CONFIG_LTO_CLANG=n/CONFIG_LTO_CLANG=y/' arch/${{ env.ARCH }}/configs/${{ env.KERNEL_CONFIG }}
             sed -i 's/CONFIG_THINLTO=n/CONFIG_THINLTO=y/' arch/${{ env.ARCH }}/configs/${{ env.KERNEL_CONFIG }}
             echo "CONFIG_LTO_NONE=n" >> arch/${{ env.ARCH }}/configs/${{ env.KERNEL_CONFIG }} || echo "⚠️ 启用 LTO 优化失败"
             echo "✅ 已启用 LTO 优化"
-        elif [ "${{ env.DISABLE_LTO }}" = "false" ]; then
+        elif [ "${{ env.USE_DISABLE_LTO }}" = "false" ]; then
             sed -i 's/CONFIG_LTO=y/CONFIG_LTO=n/' arch/${{ env.ARCH }}/configs/${{ env.KERNEL_CONFIG }}
             sed -i 's/CONFIG_LTO_CLANG=y/CONFIG_LTO_CLANG=n/' arch/${{ env.ARCH }}/configs/${{ env.KERNEL_CONFIG }}
             sed -i 's/CONFIG_THINLTO=y/CONFIG_THINLTO=n/' arch/${{ env.ARCH }}/configs/${{ env.KERNEL_CONFIG }}
@@ -498,7 +498,7 @@ jobs:
         fi
         
         make -j$(nproc --all) CC=clang O=out ARCH=${{ env.ARCH }} ${{ env.CUSTOM_CMDS }} ${{ env.EXTRA_CMDS }} ${{ env.KERNEL_CONFIG }}
-        if [ "${{ env.ENABLE_CCACHE }}" = "true" ]; then
+        if [ ${{ env.ENABLE_CCACHE }} = true ]; then
             make -j$(nproc --all) CC="ccache clang" O=out ARCH=${{ env.ARCH }} ${{ env.CUSTOM_CMDS }} ${{ env.EXTRA_CMDS }}
         else
             make -j$(nproc --all) CC=clang O=out ARCH=${{ env.ARCH }} ${{ env.CUSTOM_CMDS }} ${{ env.EXTRA_CMDS }}
