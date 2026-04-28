@@ -78,7 +78,7 @@ jobs:
                 echo "$CONFIG=$(grep -w "$CONFIG" "$CONFIG_ENV" | head -n 1 | cut -d "=" -f 2)" >> $GITHUB_ENV
             fi
         done
-
+        
     - name: Remove unused packages(移除无用的包)
       if: env.REMOVE_UNUSED_PACKAGES == 'true'
       uses: jlumbroso/free-disk-space@main
@@ -90,12 +90,12 @@ jobs:
         large-packages: true
         docker-images: true
         swap-storage: false
-
+        
     - name: Set swap to 10G
       uses: pierotofy/set-swap-space@master
       with:
         swap-size-gb: 10
-
+        
     - name: Setup build kernel environment(构建编译内核环境)
       run: |
         echo "BUILD_TIME=$(TZ=Asia/Shanghai date "+%Y%m%d%H%M")" >> $GITHUB_ENV
@@ -103,16 +103,16 @@ jobs:
         sudo apt-get update
         sudo apt-get install git ccache automake flex lzop bison gperf build-essential zip curl zlib1g-dev g++-multilib libxml2-utils bzip2 libbz2-dev libbz2-1.0 libghc-bzlib-dev squashfs-tools pngcrush schedtool dpkg-dev liblz4-tool make optipng maven libssl-dev pwgen libswitch-perl policycoreutils minicom libxml-sax-base-perl libxml-simple-perl bc libc6-dev-i386 lib32ncurses5-dev libx11-dev lib32z-dev libgl1-mesa-dev xsltproc unzip device-tree-compiler python2 python3
         mkdir -p $GITHUB_WORKSPACE/kernel_workspace
-
+        
     - name: 切换python(python/python2/python3)
       if: env.SWITCH_PYTHON != ''
       run: |
-        if [[ ${{ env.SWITCH_PYTHON }} = true ]]; then
+        if [ "${{ env.SWITCH_PYTHON }}" = "true" ]; then
             update-alternatives --set python /usr/bin/python3 2>/dev/null
             export PYTHON=/usr/bin/python3
             echo "✅ Python 已切换到 python3"
         fi
-        if [[ ${{ env.SWITCH_PYTHON }} = false ]]; then
+        if [[ "${{ env.SWITCH_PYTHON }}" = "false" ]]; then
             update-alternatives --set python /usr/bin/python2 2>/dev/null
             export PYTHON=/usr/bin/python2
             echo "✅ Python 已切换到 python2"
@@ -132,7 +132,7 @@ jobs:
         restore-keys: |
             ${{ runner.os }}-${{ env.KERNEL_CONFIG }}-${{ env.KERNEL_SOURCE_BRANCH }}-${{ env.ANDROID_VERSION }}-clang-${{ env.CLANG_BRANCH }}-${{ env.CLANG_VERSION }}-kernel-${{ env.KERNEL_VERSION }}-
             ${{ runner.os }}-${{ env.KERNEL_CONFIG }}-${{ env.KERNEL_SOURCE_BRANCH }}-${{ env.ANDROID_VERSION }}-clang-${{ env.CLANG_BRANCH }}-${{ env.CLANG_VERSION }}-
-
+            
     - name: Download Clang-aosp(下载Clang-aosp编译器)
       if: env.USE_CUSTOM_CLANG != 'true'
       run: |
@@ -168,7 +168,7 @@ jobs:
         else
             echo "✅ clang-aosp 目录已存在（缓存恢复），跳过下载！"
         fi
-
+        
     - name: Download Gcc-aosp(下载Gcc-aosp编译器)
       if: env.USE_CUSTOM_GCC_64 != 'true' || env.USE_CUSTOM_GCC_32 != 'true'
       run: |
@@ -195,7 +195,7 @@ jobs:
             fi
             echo "GCC_32=CROSS_COMPILE_ARM32=$GITHUB_WORKSPACE/kernel_workspace/gcc-32/bin/arm-linux-androideabi-" >> $GITHUB_ENV || echo "⚠️ 写入 gcc-32 失败"
         fi
-
+        
     - name: Download Custom-Gcc
       if: env.USE_CUSTOM_GCC_64 == 'true' || env.USE_CUSTOM_GCC_32 == 'true'
       run: |
@@ -242,7 +242,7 @@ jobs:
             fi
             echo "GCC_32=CROSS_COMPILE_ARM32=$GITHUB_WORKSPACE/kernel_workspace/gcc-32/bin/${{ env.CUSTOM_GCC_32_BIN }}" >> $GITHUB_ENV || echo "⚠️ 写入 gcc-32 失败"
         fi
-
+        
     - name: Download mkbootimg tools(下载mkbootimg解包工具)
       if: env.BUILD_BOOT_IMG == 'true'
       run: |
@@ -269,7 +269,7 @@ jobs:
         else
             echo "LOCALVERSION=" >> $GITHUB_ENV || echo "⚠️ 写入 LOCALVERSION 失败"
         fi
-
+        
     - name: Download source boot image(下载直链内核镜像)
       if: env.BUILD_BOOT_IMG == 'true'
       run: |
@@ -284,7 +284,7 @@ jobs:
             echo "FORMAT_MKBOOTING=$(echo `tools/unpack_bootimg.py --boot_img=boot-source.img --format mkbootimg`)" >> $GITHUB_ENV
             echo "HAVE_SOURCE_BOOT_IMAGE=true" >> $GITHUB_ENV || echo "⚠️ 设置 HAVE_SOURCE_BOOT_IMAGE 失败"
         fi
-
+        
     - name: Setup KernelSU(开启KSU)
       if: env.ENABLE_KERNELSU == 'true'
       run: |
@@ -292,7 +292,7 @@ jobs:
         curl -LSs "https://raw.githubusercontent.com/tiann/KernelSU/main/kernel/setup.sh" | bash -s ${{ env.KERNELSU_TAG }}
         KSU_VERSION=$(cd KernelSU && expr $(/usr/bin/git rev-list --count HEAD) + 10200)
         echo "UPLOADNAME=-KernelSU_$KSU_VERSION" >> $GITHUB_ENV || echo "⚠️ 写入 UPLOADNAME 失败"
-
+        
     - name: Setup Configuration for Kernel(开启内核选项)
       run: |
         echo "当前目录：$(pwd)"
@@ -554,7 +554,7 @@ jobs:
                 make -j$(nproc --all) CC=clang O=out ARCH=${{ env.ARCH }} ${{ env.CUSTOM_CMDS }} CROSS_COMPILE="aarch64-linux-gnu-" CROSS_COMPILE_ARM32="arm-linux-gnueabi-" ${{ env.EXTRA_CMDS }}${{ env.LLVM_PARAMS }}
             fi
         fi
-
+        
       # make -j$(nproc --all) CC=clang O=out ARCH=${{ env.ARCH }} ${{ env.CUSTOM_CMDS }} ${{ env.EXTRA_CMDS }} ${{ env.GCC_64 }} ${{ env.GCC_32 }} ${{ env.KERNEL_CONFIG }}
       # if [ ${{ env.ENABLE_CCACHE }} = true ]; then
       #     make -j$(nproc --all) CC="ccache clang" O=out ARCH=${{ env.ARCH }} ${{ env.CUSTOM_CMDS }} ${{ env.EXTRA_CMDS }} ${{ env.GCC_64 }} ${{ env.GCC_32 }}
@@ -567,7 +567,7 @@ jobs:
       # else
           # make -j$(nproc --all) CC=clang O=out ARCH=${{ env.ARCH }} ${{ env.CUSTOM_CMDS }} ${{ env.EXTRA_CMDS }} ${{ env.GCC_64 }} ${{ env.GCC_32 }} ${{ env.LLVM_PARAMS }} KCFLAGS="-w -Wno-error=all ${{ env.VERSION_PARAMS }}" KBUILD_CFLAGS="-w -Wno-error=all ${{ env.VERSION_PARAMS }}"
       # fi
-
+      
     - name: Check a kernel output files(检查编译内核生成文件)
       run: |
        cd $GITHUB_WORKSPACE/kernel_workspace
@@ -585,7 +585,7 @@ jobs:
                exit 1
            fi
        fi
-
+       
     - name: Make Anykernel3(制作Anykernel3卡刷包)
       if: env.CHECK_FILE_IS_OK == 'true' && env.USE_CUSTOM_ANYKERNEL3 != 'true'
       run: |
@@ -599,7 +599,7 @@ jobs:
             cp android-kernel/out/arch/${{ env.ARCH }}/boot/dtbo.img AnyKernel3/
         fi
         rm -rf AnyKernel3/.git* AnyKernel3/README.md
-
+        
     - name: Make Custom-Anykernel3(制作Custom_Anykernel3卡刷包)
       if: env.CHECK_FILE_IS_OK == 'true' && env.USE_CUSTOM_ANYKERNEL3 == 'true'
       run: |
@@ -622,7 +622,7 @@ jobs:
             cp android-kernel/out/arch/${{ env.ARCH }}/boot/dtbo.img AnyKernel3/
         fi
         rm -rf AnyKernel3/.git* AnyKernel3/README.md
-
+        
     - name: Make boot image(制作合成新的内核镜像)
       if: env.HAVE_SOURCE_BOOT_IMAGE == 'true' && env.CHECK_FILE_IS_OK == 'true'
       run: |
@@ -636,35 +636,35 @@ jobs:
             echo "Boot image is empty"
             exit 1
         fi
-
+        
     - name: Upload ${{ env.KERNEL_IMAGE_NAME }} (上传)
       if: env.CHECK_FILE_IS_OK == 'true'
       uses: actions/upload-artifact@v4
       with:
         name: ${{ env.KERNEL_IMAGE_NAME }}${{ env.LOCALVERSION }}${{ env.UPLOADNAME }}-${{ env.DEVICE }}-${{ env.BUILD_TIME }}
         path: kernel_workspace/android-kernel/out/arch/${{ env.ARCH }}/boot/${{ env.KERNEL_IMAGE_NAME }}
-
+        
     - name: Upload AnyKernel3(上传Upload AnyKernel3)
       if: env.CHECK_FILE_IS_OK == 'true'
       uses: actions/upload-artifact@v4
       with:
         name: AnyKernel3${{ env.LOCALVERSION }}${{ env.UPLOADNAME }}-${{ env.DEVICE }}-${{ env.BUILD_TIME }}
         path: kernel_workspace/AnyKernel3/*
-
+        
     - name: Upload DTBO image(上传 DTBO image)
       if: env.CHECK_DTBO_IS_OK == 'true'
       uses: actions/upload-artifact@v4
       with:
         name: dtbo-${{ env.DEVICE }}-${{ env.BUILD_TIME }}
         path: kernel_workspace/android-kernel/out/arch/${{ env.ARCH }}/boot/dtbo.img
-
+        
     - name: Upload boot image(上传 boot image)
       if: env.MAKE_BOOT_IMAGE_IS_OK == 'true'
       uses: actions/upload-artifact@v4
       with:
         name: boot${{ env.LOCALVERSION }}${{ env.UPLOADNAME }}-${{ env.DEVICE }}-${{ env.BUILD_TIME }}
         path: kernel_workspace/boot.img
-
+        
     - name: 强制保存缓存
       if: always()  # 关键：无论前面步骤成功/失败，都执行
       uses: actions/cache/save@v3
