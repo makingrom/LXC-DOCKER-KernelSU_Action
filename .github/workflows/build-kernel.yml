@@ -108,11 +108,14 @@ jobs:
       if: env.SWITCH_PYTHON != ''
       run: |
         if [ ${{ env.SWITCH_PYTHON }} = true ]; then
+            update-alternatives --install /usr/bin/python python /usr/bin/python3 1 2>/dev/null
             update-alternatives --set python /usr/bin/python3 2>/dev/null
             export PYTHON=/usr/bin/python3
             echo "✅ Python 已切换到 python3"
         fi
-        if [[ ${{ env.SWITCH_PYTHON }} = false ]]; then
+        if [ ${{ env.SWITCH_PYTHON }} = false ]; then
+            apt update && apt install -y python2 2>/dev/null
+            update-alternatives --install /usr/bin/python python /usr/bin/python2 2 2>/dev/null
             update-alternatives --set python /usr/bin/python2 2>/dev/null
             export PYTHON=/usr/bin/python2
             echo "✅ Python 已切换到 python2"
