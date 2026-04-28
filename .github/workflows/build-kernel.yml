@@ -99,16 +99,16 @@ jobs:
     - name: 切换python(python/python2/python3)
       if: env.SWITCH_PYTHON != ''
       run: |
-        if [ "${{ env.SWITCH_PYTHON }}" = "true" ]; then
-            update-alternatives --set python /usr/bin/python3 2>/dev/null
-            export PYTHON=/usr/bin/python3
-            echo "✅ Python 已切换到 python3"
-        fi
-        if [[ "${{ env.SWITCH_PYTHON }}" = "false" ]]; then
-            update-alternatives --set python /usr/bin/python2 2>/dev/null
-            export PYTHON=/usr/bin/python2
-            echo "✅ Python 已切换到 python2"
-        fi
+            if [ ${{ env.SWITCH_PYTHON }} = true ]; then
+                update-alternatives --set python /usr/bin/python3 2>/dev/null
+                export PYTHON=/usr/bin/python3
+                echo "✅ Python 已切换到 python3"
+            fi
+            if [[ ${{ env.SWITCH_PYTHON }} = false ]]; then
+                update-alternatives --set python /usr/bin/python2 2>/dev/null
+                export PYTHON=/usr/bin/python2
+                echo "✅ Python 已切换到 python2"
+            fi
         
     - name: Setup build kernel environment(构建编译内核环境)
       run: |
