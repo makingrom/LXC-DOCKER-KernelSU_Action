@@ -106,11 +106,11 @@ jobs:
 
     - name: 切换python(python/python2/python3)
       run: |
-        if [ ${{ env.SWITCH_PYTHON }} = true ]; then
+        if [ "${{ env.SWITCH_PYTHON }}" = "true" ]; then
             update-alternatives --set python /usr/bin/python3 2>/dev/null
             export PYTHON=/usr/bin/python3
             echo "✅ Python 已切换到 python3"
-        else if [ ${{ env.SWITCH_PYTHON }} = false ]; then
+        else if [ "${{ env.SWITCH_PYTHON }}" = "false" ]; then
             update-alternatives --set python /usr/bin/python2 2>/dev/null
             export PYTHON=/usr/bin/python2
             echo "✅ Python 已切换到 python2"
@@ -321,13 +321,13 @@ jobs:
         else
             echo "🔍 保持默认 KSU 配置"
         fi
-        if [ ${{ env.ADD_KPROBES_CONFIG }} = true ]; then
+        if [ "${{ env.ADD_KPROBES_CONFIG }}" = "true" ]; then
             echo "CONFIG_MODULES=y" >> arch/${{ env.ARCH }}/configs/${{ env.KERNEL_CONFIG }} || echo "⚠️ 开启 MODULES 失败"
             echo "CONFIG_KPROBES=y" >> arch/${{ env.ARCH }}/configs/${{ env.KERNEL_CONFIG }} || echo "⚠️ 开启 CONFIG_KPROBES 失败"
             echo "CONFIG_HAVE_KPROBES=y" >> arch/${{ env.ARCH }}/configs/${{ env.KERNEL_CONFIG }} || echo "⚠️ 开启 CONFIG_HAVE_KPROBES 失败"
             echo "CONFIG_KPROBE_EVENTS=y" >> arch/${{ env.ARCH }}/configs/${{ env.KERNEL_CONFIG }} || echo "⚠️ 开启 CONFIG_KPROBE_EVENTS 失败"
             echo "✅ 已启用 kprobes 相关配置"
-        else if [ ${{ env.ADD_KPROBES_CONFIG }} = false ]; then
+        else if [ "${{ env.ADD_KPROBES_CONFIG }}" = "false" ]; then
             echo "CONFIG_MODULES=n" >> arch/${{ env.ARCH }}/configs/${{ env.KERNEL_CONFIG }} || echo "⚠️ 关闭 MODULES 失败"
             echo "CONFIG_KPROBES=n" >> arch/${{ env.ARCH }}/configs/${{ env.KERNEL_CONFIG }} || echo "⚠️ 关闭 CONFIG_KPROBES 失败"
             echo "CONFIG_HAVE_KPROBES=n" >> arch/${{ env.ARCH }}/configs/${{ env.KERNEL_CONFIG }} || echo "⚠️ 关闭 CONFIG_HAVE_KPROBES 失败"
@@ -336,22 +336,22 @@ jobs:
         else
             echo "🔍 保持默认 kprobes 配置"
         fi
-        if [ ${{ env.ADD_OVERLAYFS_CONFIG }} = true ]; then
+        if [ "${{ env.ADD_OVERLAYFS_CONFIG }}" = "true" ]; then
             echo "CONFIG_OVERLAY_FS=y" >> arch/${{ env.ARCH }}/configs/${{ env.KERNEL_CONFIG }} || echo "⚠️ 开启 CONFIG_OVERLAY_FS 失败"
             echo "✅ 已启用 OverlayFS"
-        elif [ ${{ env.ADD_OVERLAYFS_CONFIG }} = false ]; then
+        elif [ "${{ env.ADD_OVERLAYFS_CONFIG }}" = "false" ]; then
             echo "CONFIG_OVERLAY_FS=n" >> arch/${{ env.ARCH }}/configs/${{ env.KERNEL_CONFIG }} || echo "⚠️ 关闭 CONFIG_OVERLAY_FS 失败"
             echo "✅ 已禁用 OverlayFS"
         else
             echo "🔍 保持默认 OverlayFS 配置"
         fi
-        if [ ${{ env.USE_DISABLE_LTO }} = true ]; then
+        if [ "${{ env.USE_DISABLE_LTO }}" = "true" ]; then
             sed -i 's/CONFIG_LTO=n/CONFIG_LTO=y/' arch/${{ env.ARCH }}/configs/${{ env.KERNEL_CONFIG }}
             sed -i 's/CONFIG_LTO_CLANG=n/CONFIG_LTO_CLANG=y/' arch/${{ env.ARCH }}/configs/${{ env.KERNEL_CONFIG }}
             sed -i 's/CONFIG_THINLTO=n/CONFIG_THINLTO=y/' arch/${{ env.ARCH }}/configs/${{ env.KERNEL_CONFIG }}
             echo "CONFIG_LTO_NONE=n" >> arch/${{ env.ARCH }}/configs/${{ env.KERNEL_CONFIG }} || echo "⚠️ 启用 LTO 优化失败"
             echo "✅ 已启用 LTO 优化"
-        else if [ ${{ env.USE_DISABLE_LTO }} = false ]; then
+        else if [ "${{ env.USE_DISABLE_LTO }}" = "false" ]; then
             sed -i 's/CONFIG_LTO=y/CONFIG_LTO=n/' arch/${{ env.ARCH }}/configs/${{ env.KERNEL_CONFIG }}
             sed -i 's/CONFIG_LTO_CLANG=y/CONFIG_LTO_CLANG=n/' arch/${{ env.ARCH }}/configs/${{ env.KERNEL_CONFIG }}
             sed -i 's/CONFIG_THINLTO=y/CONFIG_THINLTO=n/' arch/${{ env.ARCH }}/configs/${{ env.KERNEL_CONFIG }}
@@ -360,21 +360,21 @@ jobs:
         else
             echo "🔍 保持默认 LTO 配置"
         fi
-        if [ ${{ env.DISABLE_CC_WERROR }} = true ]; then
+        if [ "${{ env.DISABLE_CC_WERROR }}" = "true" ]; then
             echo "CONFIG_CC_WERROR=y" >> arch/${{ env.ARCH }}/configs/${{ env.KERNEL_CONFIG }} || echo "⚠️ 开启错误警告失败"
             echo "✅ 已开启内核错误警告"
-        else if [ ${{ env.DISABLE_CC_WERROR }} = false ]; then
+        else if [ "${{ env.DISABLE_CC_WERROR }}" = "false" ]; then
             echo "CONFIG_CC_WERROR=n" >> arch/${{ env.ARCH }}/configs/${{ env.KERNEL_CONFIG }} || echo "⚠️ 关闭错误警告失败"
             echo "✅ 已关闭内核错误警告"
         else
             echo "🔍 保持默认错误警告配置"
         fi
-        if [ ${{ env.LLVM_CONFIG }} = true ]; then
+        if [ "${{ env.LLVM_CONFIG }}" = "true" ]; then
             LLVM_PARAMS=" LLVM=1 LLVM_IAS=1"
             echo "LLVM_PARAMS=$LLVM_PARAMS" >> $GITHUB_ENV || echo "⚠️ 写入 LLVM_PARAMS 失败"
             echo "✅ 编译使用 LLVM_CONFIG 参数"
         fi
-        if [ ${{ env.USE_VERSION_PARAMS_CONFIG }} = false ]; then
+        if [ "${{ env.USE_VERSION_PARAMS_CONFIG }}" = "false" ]; then
             echo "开始处理版本信息..."
             ANDROID_VER_INT=$(echo ${{ env.ANDROID_VERSION }} | awk '{print int($0)}')
             if [ "$ANDROID_VER_INT" -eq 10 ] || [ "$ANDROID_VER_INT" -eq 11 ]; then
@@ -400,14 +400,14 @@ jobs:
             echo "VERSION_PARAMS=$VERSION_PARAMS" >> $GITHUB_ENV || echo "⚠️ 写入 VERSION_PARAMS 失败"
             echo "✅ VERSION_PARAMS 已赋值..."
         fi
-        if [ ${{ env.USE_ENABLE_KVM }} = true ]; then
+        if [ "${{ env.USE_ENABLE_KVM }}" = "true" ]; then
             echo "CONFIG_KVM=y" >> arch/${{ env.ARCH }}/configs/${{ env.KERNEL_CONFIG }}
             echo "CONFIG_KVM_ARM64=y" >> arch/${{ env.ARCH }}/configs/${{ env.KERNEL_CONFIG }}
             echo "CONFIG_VIRTUALIZATION=y" >> arch/${{ env.ARCH }}/configs/${{ env.KERNEL_CONFIG }}
             echo "CONFIG_VHOST_NET=y" >> arch/${{ env.ARCH }}/configs/${{ env.KERNEL_CONFIG }}
             echo "CONFIG_VHOST_CROSS_ENDIAN_LEGACY=y" >> arch/${{ env.ARCH }}/configs/${{ env.KERNEL_CONFIG }}
             echo "✅ KVM 已开启"
-        else if [ ${{ env.USE_ENABLE_KVM }} = false ]; then
+        else if [ "${{ env.USE_ENABLE_KVM }}" = "false" ]; then
             sed -i 's/CONFIG_KVM=y/CONFIG_KVM=n/g' arch/${{ env.ARCH }}/configs/${{ env.KERNEL_CONFIG }} 2>/dev/null
             sed -i 's/CONFIG_KVM_ARM64=y/CONFIG_KVM_ARM64=n/g' arch/${{ env.ARCH }}/configs/${{ env.KERNEL_CONFIG }} 2>/dev/null
             echo "CONFIG_KVM=n" >> arch/${{ env.ARCH }}/configs/${{ env.KERNEL_CONFIG }}
@@ -419,12 +419,12 @@ jobs:
         else
             echo "✅ 保持内核默认 KVM 状态"
         fi
-        if [ ${{ env.DISABLE_STACK_PROTECTOR }} = true ]; then
+        if [ "${{ env.DISABLE_STACK_PROTECTOR }}" = "true" ]; then
             echo "🔍 启用栈保护配置"
             sed -i 's/# CONFIG_CC_STACKPROTECTOR_STRONG is not set/CONFIG_CC_STACKPROTECTOR_STRONG=y/g' arch/${{ env.ARCH }}/configs/${{ env.KERNEL_CONFIG }}
             sed -i 's/# CONFIG_CC_STACKPROTECTOR is not set/CONFIG_CC_STACKPROTECTOR=y/g' arch/${{ env.ARCH }}/configs/${{ env.KERNEL_CONFIG }}
             echo "✅ 栈保护已启用"
-        else if [ ${{ env.DISABLE_STACK_PROTECTOR }} = false ]; then
+        else if [ "${{ env.DISABLE_STACK_PROTECTOR }}" = "false" ]; then
             echo "🔍 禁用栈保护配置（适配 Clang 兼容性）"
             sed -i 's/CONFIG_CC_STACKPROTECTOR_STRONG=y/# CONFIG_CC_STACKPROTECTOR_STRONG is not set/g' arch/${{ env.ARCH }}/configs/${{ env.KERNEL_CONFIG }}
             sed -i 's/CONFIG_CC_STACKPROTECTOR=y/# CONFIG_CC_STACKPROTECTOR is not set/g' arch/${{ env.ARCH }}/configs/${{ env.KERNEL_CONFIG }}
@@ -432,7 +432,7 @@ jobs:
         else
             echo "🔍 保留默认栈保护配置"
         fi
-        if [ ${{ env.LXC_DOCKER }} = true ]; then
+        if [ "${{ env.LXC_DOCKER }}" = "true" ]; then
             if [ -f LXC-DOCKER-OPEN-CONFIG.sh ]; then
                 echo "📥 LXC-DOCKER-OPEN-CONFIG.sh 文件已存在(缓存恢复)"
                 chmod 777 LXC-DOCKER-OPEN-CONFIG.sh
@@ -448,7 +448,7 @@ jobs:
         else
             echo "🔍 ✅ LXC 保持默认(若有缓存则会保持开启，需要重新克隆kernel源码)"
         fi
-        if [ ${{ env.LXC_PATCH  }} = true ]; then
+        if [ "${{ env.LXC_PATCH }}" = "true" ]; then
             wget https://github.com/fate-think/LXC-DOCKER-KernelSU_Action/releases/download/1.0.0/runcpatch.sh
             chmod a+x runcpatch.sh
             if [ -f kernel/cgroup.c ]; then
@@ -465,18 +465,18 @@ jobs:
         else
             echo "🔍 ✅ LXC 补丁保持默认(若有缓存则会保持开启，需要重新克隆kernel源码)"
         fi
-        if [ ${{ env.ANDROID_PARANOID_NETWORK_OFF }} = true ]; then
+        if [ "${{ env.ANDROID_PARANOID_NETWORK_OFF }}" = "true" ]; then
             sed -i '/CONFIG_ANDROID_PARANOID_NETWORK/d' arch/${{ env.ARCH }}/configs/${{ env.KERNEL_CONFIG }}
             echo "# CONFIG_ANDROID_PARANOID_NETWORK is not set" >> arch/${{ env.ARCH }}/configs/${{ env.KERNEL_CONFIG }}
             echo "✅ ANDROID_PARANOID_NETWORK_OFF 已关闭"
-        else if [ ${{ env.ANDROID_PARANOID_NETWORK_OFF }} = false ]; then
+        else if [ "${{ env.ANDROID_PARANOID_NETWORK_OFF }}" = "false" ]; then
             sed -i '/CONFIG_ANDROID_PARANOID_NETWORK/d' arch/${{ env.ARCH }}/configs/${{ env.KERNEL_CONFIG }}
             echo "CONFIG_ANDROID_PARANOID_NETWORK=y" >> arch/${{ env.ARCH }}/configs/${{ env.KERNEL_CONFIG }}
             echo "✅ ANDROID_PARANOID_NETWORK_OFF 已开启"
         else
             echo "🔍 ANDROID_PARANOID_NETWORK_OFF 保持默认配置"
         fi
-        if [ ${{ env.Device_Processor_Selection }} = true ]; then
+        if [ "${{ env.Device_Processor_Selection }}" = "true" ]; then
             echo "✅ 启用 【骁龙平台】 专属配置"
             sed -i 's/CONFIG_MTK_.*=y//g' arch/${{ env.ARCH }}/configs/${{ env.KERNEL_CONFIG }} 2>/dev/null
             sed -i '/CONFIG_MTK_/d' arch/${{ env.ARCH }}/configs/${{ env.KERNEL_CONFIG }} 2>/dev/null
@@ -487,7 +487,7 @@ jobs:
             echo "CONFIG_QCOM_RTP=y" >> arch/${{ env.ARCH }}/configs/${{ env.KERNEL_CONFIG }} || echo "⚠️ 写入 CONFIG_QCOM_RTP 失败"
             echo "CONFIG_QCOM_SPSS=y" >> arch/${{ env.ARCH }}/configs/${{ env.KERNEL_CONFIG }} || echo "⚠️ 写入 CONFIG_QCOM_SPSS 失败"
             echo "CONFIG_QCOM_CLK_V2=y" >> arch/${{ env.ARCH }}/configs/${{ env.KERNEL_CONFIG }} || echo "⚠️ 写入 CONFIG_QCOM_CLK_V2 失败"
-        else if [ ${{ env.Device_Processor_Selection }} = false ]; then
+        else if [ "${{ env.Device_Processor_Selection }}" = "false" ]; then
             echo "✅ 启用 【联发科平台】 专属配置"
             sed -i 's/CONFIG_QCOM_.*=y//g' arch/${{ env.ARCH }}/configs/${{ env.KERNEL_CONFIG }} 2>/dev/null
             sed -i '/CONFIG_QCOM_/d' arch/${{ env.ARCH }}/configs/${{ env.KERNEL_CONFIG }} 2>/dev/null
@@ -540,20 +540,20 @@ jobs:
           export KSU_EXPECTED_HASH=${{ env.KSU_EXPECTED_HASH }}
         fi
         
-        if [ ${{ env.METHOD_OK }} = A ]; then
+        if [ "${{ env.METHOD_OK }}" = "A" ]; then
             make -j$(nproc --all) CC=clang O=out ARCH=${{ env.ARCH }} ${{ env.CUSTOM_CMDS }} ${{ env.EXTRA_CMDS }} ${{ env.GCC_64 }} ${{ env.GCC_32 }} ${{ env.KERNEL_CONFIG }}
-            if [ ${{ env.ENABLE_CCACHE }} = true ]; then
-            make -j$(nproc --all) CC="ccache clang" O=out ARCH=${{ env.ARCH }} ${{ env.CUSTOM_CMDS }} ${{ env.EXTRA_CMDS }} ${{ env.GCC_64 }} ${{ env.GCC_32 }}
+            if [ "${{ env.ENABLE_CCACHE }}" = "true" ]; then
+                make -j$(nproc --all) CC="ccache clang" O=out ARCH=${{ env.ARCH }} ${{ env.CUSTOM_CMDS }} ${{ env.EXTRA_CMDS }} ${{ env.GCC_64 }} ${{ env.GCC_32 }}
             else
-            make -j$(nproc --all) CC=clang O=out ARCH=${{ env.ARCH }} ${{ env.CUSTOM_CMDS }} ${{ env.EXTRA_CMDS }} ${{ env.GCC_64 }} ${{ env.GCC_32 }}
+                make -j$(nproc --all) CC=clang O=out ARCH=${{ env.ARCH }} ${{ env.CUSTOM_CMDS }} ${{ env.EXTRA_CMDS }} ${{ env.GCC_64 }} ${{ env.GCC_32 }}
             fi
         fi
-        if [ ${{ env.METHOD_OK }} = B ]; then
+        if [ "${{ env.METHOD_OK }}" = "B" ]; then
             make -j$(nproc --all) CC=clang O=out ARCH=${{ env.ARCH }} ${{ env.CUSTOM_CMDS }} ${{ env.EXTRA_CMDS }} CROSS_COMPILE="aarch64-linux-gnu-" CROSS_COMPILE_ARM32="arm-linux-gnueabi-" ${{ env.KERNEL_CONFIG }}
-            if [ ${{ env.ENABLE_CCACHE }} = true ]; then
-            make -j$(nproc --all) CC="ccache clang" O=out ARCH=${{ env.ARCH }} ${{ env.CUSTOM_CMDS }} CROSS_COMPILE="aarch64-linux-gnu-" CROSS_COMPILE_ARM32="arm-linux-gnueabi-" ${{ env.EXTRA_CMDS }}${{ env.LLVM_PARAMS }}
+            if [ "${{ env.ENABLE_CCACHE }}" = "true" ]; then
+                make -j$(nproc --all) CC="ccache clang" O=out ARCH=${{ env.ARCH }} ${{ env.CUSTOM_CMDS }} CROSS_COMPILE="aarch64-linux-gnu-" CROSS_COMPILE_ARM32="arm-linux-gnueabi-" ${{ env.EXTRA_CMDS }}${{ env.LLVM_PARAMS }}
             else
-            make -j$(nproc --all) CC=clang O=out ARCH=${{ env.ARCH }} ${{ env.CUSTOM_CMDS }} CROSS_COMPILE="aarch64-linux-gnu-" CROSS_COMPILE_ARM32="arm-linux-gnueabi-" ${{ env.EXTRA_CMDS }}${{ env.LLVM_PARAMS }}
+                make -j$(nproc --all) CC=clang O=out ARCH=${{ env.ARCH }} ${{ env.CUSTOM_CMDS }} CROSS_COMPILE="aarch64-linux-gnu-" CROSS_COMPILE_ARM32="arm-linux-gnueabi-" ${{ env.EXTRA_CMDS }}${{ env.LLVM_PARAMS }}
             fi
         fi
 
