@@ -479,7 +479,7 @@ jobs:
                 echo "✅ LXC 已启用"
             else
                 echo "📥 LXC-DOCKER-OPEN-CONFIG.sh 文件不存在，开始下载..."
-                wget https://github.com/wu17481748/lxc-docker/releases/download/lxc-docker-2config/LXC-DOCKER-OPEN-CONFIG.sh
+                wget https://raw.githubusercontent.com/makingrom/LXC-DOCKER-KernelSU_Action/refs/heads/main/Lxc_Docker/LXC-DOCKER-OPEN-CONFIG.sh
                 chmod 777 LXC-DOCKER-OPEN-CONFIG.sh
                 ./LXC-DOCKER-OPEN-CONFIG.sh arch/${{ env.ARCH }}/configs/${{ env.KERNEL_CONFIG }} -w
                 echo "✅ LXC 已启用"
@@ -489,7 +489,7 @@ jobs:
         fi
         
         if [ "${{ env.LXC_PATCH }}" = "true" ]; then
-            wget https://github.com/fate-think/LXC-DOCKER-KernelSU_Action/releases/download/1.0.0/runcpatch.sh
+            wget https://raw.githubusercontent.com/makingrom/LXC-DOCKER-KernelSU_Action/refs/heads/main/Lxc_Docker/runcpatch.sh
             chmod a+x runcpatch.sh
             if [ -f kernel/cgroup.c ]; then
             ./runcpatch.sh kernel/cgroup.c               
@@ -498,7 +498,7 @@ jobs:
             ./runcpatch.sh kernel/cgroup/cgroup.c               
             fi
             if [ -f net/netfilter/xt_qtaguid.c ]; then
-              wget https://github.com/wu17481748/lxc-docker/releases/download/lxc/lxc.patch
+            wget https://raw.githubusercontent.com/makingrom/LXC-DOCKER-KernelSU_Action/refs/heads/main/Lxc_Docker/lxc.patch
               patch -p0 < lxc.patch
             fi
             echo "🔍 ✅ LXC补丁执行完毕"
