@@ -329,6 +329,7 @@ jobs:
         fi
         
         if [ "${{ env.ADD_KPROBES_CONFIG }}" = "true" ]; then
+            echo "✅ 正在配置 kprobes "
             sed -i '/CONFIG_MODULES/d' arch/${{ env.ARCH }}/configs/${{ env.KERNEL_CONFIG }} 2>/dev/null
             sed -i '/CONFIG_KPROBES/d' arch/${{ env.ARCH }}/configs/${{ env.KERNEL_CONFIG }} 2>/dev/null
             sed -i '/CONFIG_HAVE_KPROBES/d' arch/${{ env.ARCH }}/configs/${{ env.KERNEL_CONFIG }} 2>/dev/null
