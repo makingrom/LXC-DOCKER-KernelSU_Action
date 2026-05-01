@@ -327,10 +327,15 @@ jobs:
         if [ "${{ env.APPLY_KSU_PATCH }}" = "" ]; then
             echo "🔍 保持默认 KSU 配置"
         fi
-        if [ "${{ env.ADD_KPROBES_CONFIG }}" = "true" ]; then
+        if [ "${{ env.APPLY_KSU_PATCH }}" = "" ]; then
             echo "✅ 正在配置 kprobes"
         fi
-        
+        if [ "${{ env.APPLY_KSU_PATCH }}" = "" ]; then
+            echo "🔍 保持默认 KSU 配置"
+        fi
+        if [ "${{ env.ADD_KPROBES_CONFIG }}" = "true" ]; then
+            echo "🔍 保持默认 KSU 配置"
+        fi
         if [ "${{ env.ADD_OVERLAYFS_CONFIG }}" = "true" ]; then
             sed -i '/CONFIG_OVERLAY_FS/d' arch/${{ env.ARCH }}/configs/${{ env.KERNEL_CONFIG }} 2>/dev/null
             echo "CONFIG_OVERLAY_FS=y" >> arch/${{ env.ARCH }}/configs/${{ env.KERNEL_CONFIG }} || echo "⚠️ 开启 CONFIG_OVERLAY_FS 失败"
