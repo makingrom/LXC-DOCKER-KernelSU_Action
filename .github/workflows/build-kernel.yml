@@ -327,7 +327,7 @@ jobs:
         if [ "${{ env.APPLY_KSU_PATCH }}" = "" ]; then
             echo "🔍 保持默认 KSU 配置"
         fi
-        if [ ${{ env.ADD_KPROBES_CONFIG }} = true ]; then
+        if [ "${{ env.ADD_KPROBES_CONFIG }}" = "true" ]; then
             echo "✅ 正在配置 kprobes"
         fi
         if [ ${{ env.ADD_KPROBES_CONFIG }} = true ]; then
@@ -342,7 +342,7 @@ jobs:
             echo "CONFIG_KPROBE_EVENTS=y" >> arch/${{ env.ARCH }}/configs/${{ env.KERNEL_CONFIG }} || echo "⚠️ 开启 CONFIG_KPROBE_EVENTS 失败"
             echo "✅ 已启用 kprobes 相关配置"
         fi
-        if [ ${{ env.ADD_KPROBES_CONFIG }} = false ]; then
+        if [ ${{ env.ADD_KPROBES_CONFIG }} = true ]; then
             sed -i '/CONFIG_MODULES/d' arch/${{ env.ARCH }}/configs/${{ env.KERNEL_CONFIG }} 2>/dev/null
             sed -i '/CONFIG_KPROBES/d' arch/${{ env.ARCH }}/configs/${{ env.KERNEL_CONFIG }} 2>/dev/null
             sed -i '/CONFIG_HAVE_KPROBES/d' arch/${{ env.ARCH }}/configs/${{ env.KERNEL_CONFIG }} 2>/dev/null
