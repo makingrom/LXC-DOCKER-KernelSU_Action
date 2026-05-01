@@ -327,14 +327,31 @@ jobs:
         if [ "${{ env.APPLY_KSU_PATCH }}" = "" ]; then
             echo "🔍 保持默认 KSU 配置"
         fi
-        if [ "${{ env.APPLY_KSU_PATCH }}" = "" ]; then
-            echo "✅ 正在配置 kprobes"
-        fi
-        if [ "${{ env.APPLY_KSU_PATCH }}" = "" ]; then
-            echo "🔍 保持默认 KSU 配置"
-        fi
         if [ "${{ env.ADD_KPROBES_CONFIG }}" = "true" ]; then
-            echo "🔍 保持默认 KSU 配置"
+            echo "✅ 正在配置 kprobes"
+            sed -i '/CONFIG_MODULES/d' arch/${{ env.ARCH }}/configs/${{ env.KERNEL_CONFIG }} 2>/dev/null
+            sed -i '/CONFIG_KPROBES/d' arch/${{ env.ARCH }}/configs/${{ env.KERNEL_CONFIG }} 2>/dev/null
+            sed -i '/CONFIG_HAVE_KPROBES/d' arch/${{ env.ARCH }}/configs/${{ env.KERNEL_CONFIG }} 2>/dev/null
+            sed -i '/CONFIG_KPROBE_EVENTS/d' arch/${{ env.ARCH }}/configs/${{ env.KERNEL_CONFIG }} 2>/dev/null
+            echo "CONFIG_MODULES=y" >> arch/${{ env.ARCH }}/configs/${{ env.KERNEL_CONFIG }} || echo "⚠️ 开启 MODULES 失败"
+            echo "CONFIG_KPROBES=y" >> arch/${{ env.ARCH }}/configs/${{ env.KERNEL_CONFIG }} || echo "⚠️ 开启 CONFIG_KPROBES 失败"
+            echo "CONFIG_HAVE_KPROBES=y" >> arch/${{ env.ARCH }}/configs/${{ env.KERNEL_CONFIG }} || echo "⚠️ 开启 CONFIG_HAVE_KPROBES 失败"
+            echo "CONFIG_KPROBE_EVENTS=y" >> arch/${{ env.ARCH }}/configs/${{ env.KERNEL_CONFIG }} || echo "⚠️ 开启 CONFIG_KPROBE_EVENTS 失败"
+            echo "✅ 已启用 kprobes 相关配置"
+        fi
+        if [ "${{ env.ADD_KPROBES_CONFIG }}" = "false" ]; then
+            sed -i '/CONFIG_MODULES/d' arch/${{ env.ARCH }}/configs/${{ env.KERNEL_CONFIG }} 2>/dev/null
+            sed -i '/CONFIG_KPROBES/d' arch/${{ env.ARCH }}/configs/${{ env.KERNEL_CONFIG }} 2>/dev/null
+            sed -i '/CONFIG_HAVE_KPROBES/d' arch/${{ env.ARCH }}/configs/${{ env.KERNEL_CONFIG }} 2>/dev/null
+            sed -i '/CONFIG_KPROBE_EVENTS/d' arch/${{ env.ARCH }}/configs/${{ env.KERNEL_CONFIG }} 2>/dev/null
+            echo "CONFIG_MODULES=n" >> arch/${{ env.ARCH }}/configs/${{ env.KERNEL_CONFIG }} || echo "⚠️ 关闭 MODULES 失败"
+            echo "CONFIG_KPROBES=n" >> arch/${{ env.ARCH }}/configs/${{ env.KERNEL_CONFIG }} || echo "⚠️ 关闭 CONFIG_KPROBES 失败"
+            echo "CONFIG_HAVE_KPROBES=n" >> arch/${{ env.ARCH }}/configs/${{ env.KERNEL_CONFIG }} || echo "⚠️ 关闭 CONFIG_HAVE_KPROBES 失败"
+            echo "CONFIG_KPROBE_EVENTS=n" >> arch/${{ env.ARCH }}/configs/${{ env.KERNEL_CONFIG }} || echo "⚠️ 关闭 CONFIG_KPROBE_EVENTS 失败"
+            echo "✅ 已关闭 kprobes 相关配置"
+        fi
+        if [ "${{ env.ADD_KPROBES_CONFIG }}" = "" ]; then
+            echo "🔍 保持默认 kprobes 配置"
         fi
         if [ "${{ env.ADD_OVERLAYFS_CONFIG }}" = "true" ]; then
             sed -i '/CONFIG_OVERLAY_FS/d' arch/${{ env.ARCH }}/configs/${{ env.KERNEL_CONFIG }} 2>/dev/null
@@ -531,32 +548,6 @@ jobs:
         if [ "${{ env.Device_Processor_Selection }}" = "" ]; then
             echo "🔍 未选择平台，保持默认内核配置"
         fi
-      # if [ ${{ env.ADD_KPROBES_CONFIG }} = true ]; then
-      #     echo "✅ 正在配置 kprobes"
-      #     sed -i '/CONFIG_MODULES/d' arch/${{ env.ARCH }}/configs/${{ env.KERNEL_CONFIG }} 2>/dev/null
-      #     sed -i '/CONFIG_KPROBES/d' arch/${{ env.ARCH }}/configs/${{ env.KERNEL_CONFIG }} 2>/dev/null
-      #     sed -i '/CONFIG_HAVE_KPROBES/d' arch/${{ env.ARCH }}/configs/${{ env.KERNEL_CONFIG }} 2>/dev/null
-      #     sed -i '/CONFIG_KPROBE_EVENTS/d' arch/${{ env.ARCH }}/configs/${{ env.KERNEL_CONFIG }} 2>/dev/null
-      #     echo "CONFIG_MODULES=y" >> arch/${{ env.ARCH }}/configs/${{ env.KERNEL_CONFIG }} || echo "⚠️ 开启 MODULES 失败"
-      #     echo "CONFIG_KPROBES=y" >> arch/${{ env.ARCH }}/configs/${{ env.KERNEL_CONFIG }} || echo "⚠️ 开启 CONFIG_KPROBES 失败"
-      #     echo "CONFIG_HAVE_KPROBES=y" >> arch/${{ env.ARCH }}/configs/${{ env.KERNEL_CONFIG }} || echo "⚠️ 开启 CONFIG_HAVE_KPROBES 失败"
-      #     echo "CONFIG_KPROBE_EVENTS=y" >> arch/${{ env.ARCH }}/configs/${{ env.KERNEL_CONFIG }} || echo "⚠️ 开启 CONFIG_KPROBE_EVENTS 失败"
-      #     echo "✅ 已启用 kprobes 相关配置"
-      # fi
-      # if [ ${{ env.ADD_KPROBES_CONFIG }} = true ]; then
-      #     sed -i '/CONFIG_MODULES/d' arch/${{ env.ARCH }}/configs/${{ env.KERNEL_CONFIG }} 2>/dev/null
-      #     sed -i '/CONFIG_KPROBES/d' arch/${{ env.ARCH }}/configs/${{ env.KERNEL_CONFIG }} 2>/dev/null
-      #     sed -i '/CONFIG_HAVE_KPROBES/d' arch/${{ env.ARCH }}/configs/${{ env.KERNEL_CONFIG }} 2>/dev/null
-      #     sed -i '/CONFIG_KPROBE_EVENTS/d' arch/${{ env.ARCH }}/configs/${{ env.KERNEL_CONFIG }} 2>/dev/null
-      #     echo "CONFIG_MODULES=n" >> arch/${{ env.ARCH }}/configs/${{ env.KERNEL_CONFIG }} || echo "⚠️ 关闭 MODULES 失败"
-      #     echo "CONFIG_KPROBES=n" >> arch/${{ env.ARCH }}/configs/${{ env.KERNEL_CONFIG }} || echo "⚠️ 关闭 CONFIG_KPROBES 失败"
-      #     echo "CONFIG_HAVE_KPROBES=n" >> arch/${{ env.ARCH }}/configs/${{ env.KERNEL_CONFIG }} || echo "⚠️ 关闭 CONFIG_HAVE_KPROBES 失败"
-      #     echo "CONFIG_KPROBE_EVENTS=n" >> arch/${{ env.ARCH }}/configs/${{ env.KERNEL_CONFIG }} || echo "⚠️ 关闭 CONFIG_KPROBE_EVENTS 失败"
-      #     echo "✅ 已关闭 kprobes 相关配置"
-      # fi
-      # if [ "${{ env.ADD_KPROBES_CONFIG }}" = "true" ]; then
-      #     echo "🔍 保持默认 kprobes 配置"
-      # fi
         
     - name: Setup ccache
       if: env.ENABLE_CCACHE == 'true'
