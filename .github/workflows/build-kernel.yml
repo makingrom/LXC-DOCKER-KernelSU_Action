@@ -323,6 +323,7 @@ jobs:
         if [ "${{ env.APPLY_KSU_PATCH }}" = "" ]; then
             echo "🔍 保持默认 KSU 配置"
         fi
+        ADD_KPROBES_CONFIG="${{ env.ADD_KPROBES_CONFIG }}"
         case "${{ env.ADD_KPROBES_CONFIG }}" in
             "true")
                 echo "CONFIG_MODULES=y" >> arch/arm64/configs/vendor/wayne_defconfig || echo "⚠️ 开启 MODULES 失败"
