@@ -174,7 +174,7 @@ jobs:
         else
             echo "✅ clang-aosp 目录已存在（缓存恢复），跳过下载！"
         fi
-        
+
     - name: Download Gcc-aosp(下载Gcc-aosp编译器)
       if: env.USE_CUSTOM_GCC_64 != 'true' || env.USE_CUSTOM_GCC_32 != 'true'
       run: |
@@ -324,7 +324,7 @@ jobs:
             echo "CONFIG_KPM=y" >> arch/${{ env.ARCH }}/configs/${{ env.KERNEL_CONFIG }} || echo "⚠️ 开启 CONFIG_KPM 失败"
             echo "CONFIG_SUPERCALL=y" >> arch/${{ env.ARCH }}/configs/${{ env.KERNEL_CONFIG }} || echo "⚠️ 开启 CONFIG_SUPERCALL 失败"
             echo "CONFIG_KSU_ALLOWLIST=y" >> arch/${{ env.ARCH }}/configs/${{ env.KERNEL_CONFIG }} || echo "⚠️ 开启 CONFIG_KSU_ALLOWLIST 失败"
-            echo "🔍 保持默认 KSU 配置"
+            echo "✅ 保持默认 KSU 配置"
         fi
         if [ "${{ env.ADD_KPROBES_CONFIG }}" = "true" ]; then
             echo "✅ 正在配置 kprobes"
@@ -350,7 +350,7 @@ jobs:
             echo "✅ 已关闭 kprobes 相关配置"
         fi
         if [ "${{ env.ADD_KPROBES_CONFIG }}" = "" ]; then
-            echo "🔍 保持默认 kprobes 配置"
+            echo "✅ 保持默认 kprobes 配置"
         fi
         if [ "${{ env.ADD_OVERLAYFS_CONFIG }}" = "true" ]; then
             sed -i '/CONFIG_OVERLAY_FS/d' arch/${{ env.ARCH }}/configs/${{ env.KERNEL_CONFIG }} 2>/dev/null
