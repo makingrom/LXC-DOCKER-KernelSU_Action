@@ -380,7 +380,7 @@ jobs:
             echo "✅ 已禁用 LTO 优化"
         fi
         if [ "${{ env.USE_DISABLE_LTO }}" = "" ]; then
-            echo ✅ 保持默认 LTO 配置"
+            echo "✅ 保持默认 LTO 配置"
         fi
         if [ "${{ env.DISABLE_CC_WERROR }}" = "true" ]; then
             sed -i '/CONFIG_CC_WERROR/d' arch/${{ env.ARCH }}/configs/${{ env.KERNEL_CONFIG }} 2>/dev/null
