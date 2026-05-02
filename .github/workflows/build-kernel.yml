@@ -314,14 +314,16 @@ jobs:
                 sed -i 's/CONFIG_KSU=y/CONFIG_KSU=n/g' arch/${{ env.ARCH }}/configs/${{ env.KERNEL_CONFIG }} 2>/dev/null
                 sed -i 's/# CONFIG_KSU is not set/CONFIG_KSU=n/g' arch/${{ env.ARCH }}/configs/${{ env.KERNEL_CONFIG }} 2>/dev/null
             else
-                echo "CONFIG_KSU=n" >> arch/${{ env.ARCH }}/configs/${{ env.KERNEL_CONFIG }} || echo "⚠️ 关闭 CONFIG_KSU 失败"
+                echo "CONFIG_KSU=y" >> arch/${{ env.ARCH }}/configs/${{ env.KERNEL_CONFIG }} || echo "⚠️ 关闭 CONFIG_KSU 失败"
                 echo "CONFIG_KPM=n" >> arch/${{ env.ARCH }}/configs/${{ env.KERNEL_CONFIG }} || echo "⚠️ 关闭 CONFIG_KPM 失败"
             fi
             echo "✅ 已关闭 CONFIG_KSU"
         fi
         if [ "${{ env.APPLY_KSU_PATCH }}" = "" ]; then
             echo "CONFIG_KSU=y" >> arch/${{ env.ARCH }}/configs/${{ env.KERNEL_CONFIG }} || echo "⚠️ 开启 CONFIG_KSU 失败"
-            echo "CONFIG_KPM=n" >> arch/${{ env.ARCH }}/configs/${{ env.KERNEL_CONFIG }} || echo "⚠️ 开启 CONFIG_KPM 失败"
+            echo "CONFIG_KPM=y" >> arch/${{ env.ARCH }}/configs/${{ env.KERNEL_CONFIG }} || echo "⚠️ 开启 CONFIG_KPM 失败"
+            echo "CONFIG_SUPERCALL=y" >> arch/${{ env.ARCH }}/configs/${{ env.KERNEL_CONFIG }} || echo "⚠️ 开启 CONFIG_SUPERCALL 失败"
+            echo "CONFIG_KSU_ALLOWLIST=y" >> arch/${{ env.ARCH }}/configs/${{ env.KERNEL_CONFIG }} || echo "⚠️ 开启 CONFIG_KSU_ALLOWLIST 失败"
             echo "🔍 保持默认 KSU 配置"
         fi
         if [ "${{ env.ADD_KPROBES_CONFIG }}" = "true" ]; then
@@ -361,7 +363,7 @@ jobs:
             echo "✅ 已禁用 OverlayFS"
         fi
         if [ "${{ env.ADD_OVERLAYFS_CONFIG }}" = "" ]; then
-            echo "🔍 保持默认 OverlayFS 配置"
+            echo "✅ 保持默认 OverlayFS 配置"
         fi
         if [ "${{ env.USE_DISABLE_LTO }}" = "true" ]; then
             sed -i 's/CONFIG_LTO=n/CONFIG_LTO=y/' arch/${{ env.ARCH }}/configs/${{ env.KERNEL_CONFIG }} 2>/dev/null
@@ -378,7 +380,7 @@ jobs:
             echo "✅ 已禁用 LTO 优化"
         fi
         if [ "${{ env.USE_DISABLE_LTO }}" = "" ]; then
-            echo "🔍 保持默认 LTO 配置"
+            echo ✅ 保持默认 LTO 配置"
         fi
         if [ "${{ env.DISABLE_CC_WERROR }}" = "true" ]; then
             sed -i '/CONFIG_CC_WERROR/d' arch/${{ env.ARCH }}/configs/${{ env.KERNEL_CONFIG }} 2>/dev/null
@@ -391,7 +393,7 @@ jobs:
             echo "✅ 已关闭内核错误警告"
         fi
         if [ "${{ env.DISABLE_CC_WERROR }}" = "" ]; then
-            echo "🔍 保持默认错误警告配置"
+            echo "✅ 保持默认错误警告配置"
         fi
         
         if [ "${{ env.LLVM_CONFIG }}" = "true" ]; then
@@ -451,19 +453,19 @@ jobs:
         fi
         
         if [ "${{ env.DISABLE_STACK_PROTECTOR }}" = "true" ]; then
-            echo "🔍 启用栈保护配置"
+            echo "启用栈保护配置"
             sed -i 's/# CONFIG_CC_STACKPROTECTOR_STRONG is not set/CONFIG_CC_STACKPROTECTOR_STRONG=y/g' arch/${{ env.ARCH }}/configs/${{ env.KERNEL_CONFIG }}
             sed -i 's/# CONFIG_CC_STACKPROTECTOR is not set/CONFIG_CC_STACKPROTECTOR=y/g' arch/${{ env.ARCH }}/configs/${{ env.KERNEL_CONFIG }}
             echo "✅ 栈保护已启用"
         fi
         if [ "${{ env.DISABLE_STACK_PROTECTOR }}" = "false" ]; then
-            echo "🔍 禁用栈保护配置（适配 Clang 兼容性）"
+            echo "禁用栈保护配置（适配 Clang 兼容性）"
             sed -i 's/CONFIG_CC_STACKPROTECTOR_STRONG=y/# CONFIG_CC_STACKPROTECTOR_STRONG is not set/g' arch/${{ env.ARCH }}/configs/${{ env.KERNEL_CONFIG }}
             sed -i 's/CONFIG_CC_STACKPROTECTOR=y/# CONFIG_CC_STACKPROTECTOR is not set/g' arch/${{ env.ARCH }}/configs/${{ env.KERNEL_CONFIG }}
             echo "✅ 栈保护已禁用"
         fi
         if [ "${{ env.DISABLE_STACK_PROTECTOR }}" = "" ]; then
-            echo "🔍 保留默认栈保护配置"
+            echo "✅ 保留默认栈保护配置"
         fi
         
         if [ "${{ env.LXC_DOCKER }}" = "true" ]; then
@@ -480,7 +482,7 @@ jobs:
                 echo "✅ LXC 已启用"
             fi
         else
-            echo "🔍 ✅ LXC 保持默认(若有缓存则会保持开启，需要重新克隆kernel源码)"
+            echo "✅ LXC 保持默认(若有缓存则会保持开启，需要重新克隆kernel源码)"
         fi
         
         if [ "${{ env.LXC_PATCH }}" = "true" ]; then
@@ -496,9 +498,9 @@ jobs:
             wget https://raw.githubusercontent.com/makingrom/LXC-DOCKER-KernelSU_Action/refs/heads/main/Lxc_Docker/lxc.patch
               patch -p0 < lxc.patch
             fi
-            echo "🔍 ✅ LXC补丁执行完毕"
+            echo "✅ LXC补丁执行完毕"
         else
-            echo "🔍 ✅ LXC 补丁保持默认(若有缓存则会保持开启，需要重新克隆kernel源码)"
+            echo "✅ LXC 补丁保持默认(若有缓存则会保持开启，需要重新克隆kernel源码)"
         fi
         
         if [ "${{ env.ANDROID_PARANOID_NETWORK_OFF }}" = "true" ]; then
@@ -512,7 +514,7 @@ jobs:
             echo "✅ ANDROID_PARANOID_NETWORK_OFF 已开启"
         fi
         if [ "${{ env.ANDROID_PARANOID_NETWORK_OFF }}" = "" ]; then
-            echo "🔍 ANDROID_PARANOID_NETWORK_OFF 保持默认配置"
+            echo "✅ ANDROID_PARANOID_NETWORK_OFF 保持默认配置"
         fi
         
         if [ "${{ env.Device_Processor_Selection }}" = "true" ]; then
@@ -543,7 +545,7 @@ jobs:
             sed -i 's/CONFIG_MTK_NFC_CLKBUF_ENABLE=y/CONFIG_MTK_NFC_CLKBUF_ENABLE=n/g' arch/${{ env.ARCH }}/configs/${{ env.KERNEL_CONFIG }} 2>/dev/null
         fi
         if [ "${{ env.Device_Processor_Selection }}" = "" ]; then
-            echo "🔍 未选择平台，保持默认内核配置"
+            echo "✅ 未选择平台，保持默认内核配置"
         fi
 
     - name: Setup KernelSU(开启KSU)
@@ -559,7 +561,10 @@ jobs:
         git clone --depth=1 --branch $KSU_BRANCH $KSU_REPO $KSU_TMP_DIR
         echo "[+] 覆盖复制KernelSU kernel文件夹到目标目录..."
         cp -rfv $KSU_TMP_DIR/kernel/* $TARGET_KERNEL_DIR/
+        mkdir -p include/uapi
+        cp -rfv $KSU_TMP_DIR/uapi/* $TARGET_KERNEL_DIR/include/uapi/
         rm -rf $KSU_TMP_DIR
+        
         echo "[+] 执行KernelSU setup.sh..."
         curl -LSs "https://raw.githubusercontent.com/makingrom/SukiSU-Ultra/main/kernel/setup.sh" | bash -s nongki
       # curl -LSs "https://raw.githubusercontent.com/tiann/KernelSU/main/kernel/setup.sh" | bash -s ${{ env.KERNELSU_TAG }}
