@@ -304,6 +304,7 @@ jobs:
                 sed -i 's/CONFIG_KSU=n/CONFIG_KSU=y/g' arch/${{ env.ARCH }}/configs/${{ env.KERNEL_CONFIG }} 2>/dev/null
             else
                 echo "CONFIG_KSU=y" >> arch/${{ env.ARCH }}/configs/${{ env.KERNEL_CONFIG }} || echo "⚠️ 开启 CONFIG_KSU 失败"
+                echo "CONFIG_KPM=y" >> arch/${{ env.ARCH }}/configs/${{ env.KERNEL_CONFIG }} || echo "⚠️ 开启 CONFIG_KPM 失败"
             fi
             echo "✅ 已应用 KSU 补丁并开启 CONFIG_KSU"
         fi
@@ -314,11 +315,13 @@ jobs:
                 sed -i 's/# CONFIG_KSU is not set/CONFIG_KSU=n/g' arch/${{ env.ARCH }}/configs/${{ env.KERNEL_CONFIG }} 2>/dev/null
             else
                 echo "CONFIG_KSU=n" >> arch/${{ env.ARCH }}/configs/${{ env.KERNEL_CONFIG }} || echo "⚠️ 关闭 CONFIG_KSU 失败"
+                echo "CONFIG_KPM=n" >> arch/${{ env.ARCH }}/configs/${{ env.KERNEL_CONFIG }} || echo "⚠️ 关闭 CONFIG_KPM 失败"
             fi
             echo "✅ 已关闭 CONFIG_KSU"
         fi
         if [ "${{ env.APPLY_KSU_PATCH }}" = "" ]; then
             echo "CONFIG_KSU=y" >> arch/${{ env.ARCH }}/configs/${{ env.KERNEL_CONFIG }} || echo "⚠️ 开启 CONFIG_KSU 失败"
+            echo "CONFIG_KPM=y" >> arch/${{ env.ARCH }}/configs/${{ env.KERNEL_CONFIG }} || echo "⚠️ 开启 CONFIG_KPM 失败"
             echo "🔍 保持默认 KSU 配置"
         fi
         if [ "${{ env.ADD_KPROBES_CONFIG }}" = "true" ]; then
@@ -547,7 +550,18 @@ jobs:
       if: env.ENABLE_KERNELSU == 'true'
       run: |
         cd $GITHUB_WORKSPACE/kernel_workspace/android-kernel
-        curl -LSs "https://raw.githubusercontent.com/SukiSU-Ultra/SukiSU-Ultra/main/kernel/setup.sh" | bash -s nongki
+
+        KSU_REPO="https://github.com/makingrom/SukiSU-Ultra"
+        KSU_BRANCH="main"
+        KSU_TMP_DIR="./KernelSU_Temp"
+        TARGET_KERNEL_DIR="./kernel"
+        echo "[+] 克隆KernelSU源码 (分支: $KSU_BRANCH)..."
+        git clone --depth=1 --branch $KSU_BRANCH $KSU_REPO $KSU_TMP_DIR
+        echo "[+] 覆盖复制KernelSU kernel文件夹到目标目录..."
+        cp -rfv $KSU_TMP_DIR/kernel/* $TARGET_KERNEL_DIR/
+        rm -rf $KSU_TMP_DIR
+        echo "[+] 执行KernelSU setup.sh..."
+        curl -LSs "https://raw.githubusercontent.com/makingrom/SukiSU-Ultra/main/kernel/setup.sh" | bash -s nongki
       # curl -LSs "https://raw.githubusercontent.com/tiann/KernelSU/main/kernel/setup.sh" | bash -s ${{ env.KERNELSU_TAG }}
       # KSU_VERSION=$(cd KernelSU && expr $(/usr/bin/git rev-list --count HEAD) + 10200)
       # echo "UPLOADNAME=-KernelSU_$KSU_VERSION" >> $GITHUB_ENV || echo "⚠️ 写入 UPLOADNAME 失败"
