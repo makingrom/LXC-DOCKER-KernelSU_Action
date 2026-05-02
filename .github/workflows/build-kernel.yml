@@ -290,17 +290,7 @@ jobs:
             echo "FORMAT_MKBOOTING=$(echo `tools/unpack_bootimg.py --boot_img=boot-source.img --format mkbootimg`)" >> $GITHUB_ENV
             echo "HAVE_SOURCE_BOOT_IMAGE=true" >> $GITHUB_ENV || echo "⚠️ 设置 HAVE_SOURCE_BOOT_IMAGE 失败"
         fi
-        
-    - name: Setup KernelSU(开启KSU)
-      if: env.ENABLE_KERNELSU == 'true'
-      run: |
-        cd $GITHUB_WORKSPACE/kernel_workspace/android-kernel
-        curl -LSs "https://raw.githubusercontent.com/SukiSU-Ultra/SukiSU-Ultra/main/kernel/setup.sh" | bash -s nongki
-      # curl -LSs "https://raw.githubusercontent.com/tiann/KernelSU/main/kernel/setup.sh" | bash -s ${{ env.KERNELSU_TAG }}
-      # KSU_VERSION=$(cd KernelSU && expr $(/usr/bin/git rev-list --count HEAD) + 10200)
-      # echo "UPLOADNAME=-KernelSU_$KSU_VERSION" >> $GITHUB_ENV || echo "⚠️ 写入 UPLOADNAME 失败"
-      # bash $GITHUB_WORKSPACE/patches/patches.sh || echo "patches.sh 执行失败，但继续"
-        
+  
     - name: Setup Configuration for Kernel(开启内核选项)
       run: |
         echo "当前目录：$(pwd)"
@@ -309,7 +299,6 @@ jobs:
             echo "当前目录：$(pwd)"
             wget https://raw.githubusercontent.com/Frostleaft07/KernelSU-Patch/refs/heads/main/hooks-k4.19/official_hook_4.19.patch
             patch -p1< official_hook_4.19.patch
-
             if grep -q "CONFIG_KSU" arch/${{ env.ARCH }}/configs/${{ env.KERNEL_CONFIG }}; then
                 sed -i 's/# CONFIG_KSU is not set/CONFIG_KSU=y/g' arch/${{ env.ARCH }}/configs/${{ env.KERNEL_CONFIG }} 2>/dev/null
                 sed -i 's/CONFIG_KSU=n/CONFIG_KSU=y/g' arch/${{ env.ARCH }}/configs/${{ env.KERNEL_CONFIG }} 2>/dev/null
@@ -329,6 +318,7 @@ jobs:
             echo "✅ 已关闭 CONFIG_KSU"
         fi
         if [ "${{ env.APPLY_KSU_PATCH }}" = "" ]; then
+            echo "CONFIG_KSU=y" >> arch/${{ env.ARCH }}/configs/${{ env.KERNEL_CONFIG }} || echo "⚠️ 开启 CONFIG_KSU 失败"
             echo "🔍 保持默认 KSU 配置"
         fi
         if [ "${{ env.ADD_KPROBES_CONFIG }}" = "true" ]; then
@@ -552,7 +542,17 @@ jobs:
         if [ "${{ env.Device_Processor_Selection }}" = "" ]; then
             echo "🔍 未选择平台，保持默认内核配置"
         fi
-        
+
+    - name: Setup KernelSU(开启KSU)
+      if: env.ENABLE_KERNELSU == 'true'
+      run: |
+        cd $GITHUB_WORKSPACE/kernel_workspace/android-kernel
+        curl -LSs "https://raw.githubusercontent.com/SukiSU-Ultra/SukiSU-Ultra/main/kernel/setup.sh" | bash -s nongki
+      # curl -LSs "https://raw.githubusercontent.com/tiann/KernelSU/main/kernel/setup.sh" | bash -s ${{ env.KERNELSU_TAG }}
+      # KSU_VERSION=$(cd KernelSU && expr $(/usr/bin/git rev-list --count HEAD) + 10200)
+      # echo "UPLOADNAME=-KernelSU_$KSU_VERSION" >> $GITHUB_ENV || echo "⚠️ 写入 UPLOADNAME 失败"
+      # bash $GITHUB_WORKSPACE/patches/patches.sh || echo "patches.sh 执行失败，但继续"
+
     - name: Setup ccache
       if: env.ENABLE_CCACHE == 'true'
       uses: hendrikmuhs/ccache-action@v1.2
