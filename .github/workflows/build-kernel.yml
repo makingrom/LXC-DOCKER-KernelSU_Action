@@ -561,7 +561,10 @@ jobs:
         git clone --depth=1 --branch $KSU_BRANCH $KSU_REPO $KSU_TMP_DIR
         echo "[+] 覆盖复制KernelSU kernel文件夹到目标目录..."
         cp -rfv $KSU_TMP_DIR/kernel/* $TARGET_KERNEL_DIR/
+        rm -rf $TARGET_KERNEL_DIR/include/uapi
         mkdir -p $TARGET_KERNEL_DIR/include/uapi
+        mkdir -p ./uapi
+        cp -rfv $KSU_TMP_DIR/uapi/* ./uapi/
         cp -rfv $KSU_TMP_DIR/uapi/* $TARGET_KERNEL_DIR/include/uapi/
         rm -rf $KSU_TMP_DIR
         
