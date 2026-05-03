@@ -553,23 +553,27 @@ jobs:
       run: |
         cd $GITHUB_WORKSPACE/kernel_workspace/android-kernel
 
-        KSU_REPO="https://github.com/makingrom/KernelSU"
-        KSU_BRANCH="main"
-        KSU_TMP_DIR="./KernelSU_Temp"
-        TARGET_KERNEL_DIR="./kernel"
-        echo "[+] 克隆KernelSU源码 (分支: $KSU_BRANCH)..."
-        git clone --depth=1 --branch $KSU_BRANCH $KSU_REPO $KSU_TMP_DIR
-        echo "[+] 覆盖复制KernelSU kernel文件夹到目标目录..."
-        cp -rfv $KSU_TMP_DIR/kernel/* $TARGET_KERNEL_DIR/
-        rm -rf $TARGET_KERNEL_DIR/include/uapi
-        mkdir -p $TARGET_KERNEL_DIR/include/uapi
-        mkdir -p ./uapi
-        cp -rfv $KSU_TMP_DIR/uapi/* ./uapi/
-        cp -rfv $KSU_TMP_DIR/uapi/* $TARGET_KERNEL_DIR/include/uapi/
-        rm -rf $KSU_TMP_DIR
+        curl -LSs "https://raw.githubusercontent.com/tiann/KernelSU/main/kernel/setup.sh" | bash -s ${{ env.KERNELSU_TAG }}
+        KSU_VERSION=$(cd KernelSU && expr $(/usr/bin/git rev-list --count HEAD) + 10200)
+        echo "UPLOADNAME=-KernelSU_$KSU_VERSION" >> $GITHUB_ENV || echo "⚠️ 写入 UPLOADNAME 失败"
 
-        echo "[+] 执行KernelSU setup.sh..."
-        curl -LSs "https://raw.githubusercontent.com/makingrom/SukiSU-Ultra/main/kernel/setup.sh" | bash -s nongki
+
+      # KSU_REPO="https://github.com/makingrom/KernelSU"
+      # KSU_BRANCH="main"
+      # KSU_TMP_DIR="./KernelSU_Temp"
+      # TARGET_KERNEL_DIR="./kernel"
+      # echo "[+] 克隆KernelSU源码 (分支: $KSU_BRANCH)..."
+      # git clone --depth=1 --branch $KSU_BRANCH $KSU_REPO $KSU_TMP_DIR
+      # echo "[+] 覆盖复制KernelSU kernel文件夹到目标目录..."
+      # cp -rfv $KSU_TMP_DIR/kernel/* $TARGET_KERNEL_DIR/
+      # rm -rf $TARGET_KERNEL_DIR/include/uapi
+      # mkdir -p $TARGET_KERNEL_DIR/include/uapi
+      # mkdir -p ./uapi
+      # cp -rfv $KSU_TMP_DIR/uapi/* ./uapi/
+      # cp -rfv $KSU_TMP_DIR/uapi/* $TARGET_KERNEL_DIR/include/uapi/
+      # rm -rf $KSU_TMP_DIR
+
+      # echo "[+] 执行KernelSU setup.sh..."
 
       # sed -i '/MODULE_IMPORT_NS/d' kernel/core/init.c
       # sed -i 's/#include <linux\/pgtable.h>/#include <asm\/pgtable.h>/' kernel/feature/sucompat.c
