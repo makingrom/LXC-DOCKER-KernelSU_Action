@@ -570,6 +570,8 @@ jobs:
         sed -i '/MODULE_IMPORT_NS/d' kernel/core/init.c
         sed -i 's/#include <linux\/pgtable.h>/#include <asm\/pgtable.h>/' kernel/feature/sucompat.c
         sed -i '/obj-y += feature/d' kernel/Makefile
+        rm kernel/feature/sucompat.c
+        echo "" > kernel/feature/Makefile
         
         echo "[+] 执行KernelSU setup.sh..."
         curl -LSs "https://raw.githubusercontent.com/makingrom/SukiSU-Ultra/main/kernel/setup.sh" | bash -s nongki
