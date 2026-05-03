@@ -571,7 +571,7 @@ jobs:
         sed -i 's/#include <linux\/pgtable.h>/#include <asm\/pgtable.h>/' kernel/feature/sucompat.c
         sed -i 's/strncpy_from_user_nofault/strncpy_from_user/g' kernel/feature/sucompat.c
         sed -i 's/copy_to_kernel_nofault/_copy_from_user/g' kernel/hook/arm64/patch_memory.c
-        sed -i 's/#include "flask.h"//' kernel/infra/file_wrapper.c
+        sed -i 's/#include "flask.h"//' security/selinux/include/objsec.h
         
         echo "[+] 执行KernelSU setup.sh..."
         curl -LSs "https://raw.githubusercontent.com/makingrom/SukiSU-Ultra/main/kernel/setup.sh" | bash -s nongki
