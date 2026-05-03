@@ -569,13 +569,14 @@ jobs:
         rm -rf $KSU_TMP_DIR
         sed -i '/MODULE_IMPORT_NS/d' kernel/core/init.c
         sed -i 's/#include <linux\/pgtable.h>/#include <asm\/pgtable.h>/' kernel/feature/sucompat.c
-
-        sed -i '/obj-y += feature/d' kernel/Makefile
-        echo "obj-y := " > kernel/feature/Makefile
-        rm -rf kernel/feature/*.o kernel/feature/.*.cmd
+        sed -i 's/strncpy_from_user_nofault/strncpy_from_user/g' kernel/feature/sucompat.c
         
         echo "[+] 执行KernelSU setup.sh..."
         curl -LSs "https://raw.githubusercontent.com/makingrom/SukiSU-Ultra/main/kernel/setup.sh" | bash -s nongki
+        
+      # sed -i '/obj-y += feature/d' kernel/Makefile
+      # echo "obj-y := " > kernel/feature/Makefile
+      # rm -rf kernel/feature/*.o kernel/feature/.*.cmd
       # curl -LSs "https://raw.githubusercontent.com/tiann/KernelSU/main/kernel/setup.sh" | bash -s ${{ env.KERNELSU_TAG }}
       # KSU_VERSION=$(cd KernelSU && expr $(/usr/bin/git rev-list --count HEAD) + 10200)
       # echo "UPLOADNAME=-KernelSU_$KSU_VERSION" >> $GITHUB_ENV || echo "⚠️ 写入 UPLOADNAME 失败"
