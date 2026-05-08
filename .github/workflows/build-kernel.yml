@@ -142,10 +142,10 @@ jobs:
             ${{ github.workspace }}/kernel_workspace/gcc-32
             ${{ github.workspace }}/kernel_workspace/tools
             ${{ github.workspace }}/kernel_workspace/boot-source.img
-        key: ${{ runner.os }}-${{ env.KERNEL_CONFIG }}-${{ env.KERNEL_SOURCE_BRANCH }}-USE_MTK_MODULES-${{ env.USE_MTK_KERNEL_MODULES }}-MTK_MODULES_BRANCH-${{ env.MTK_KERNEL_MODULES_SOURCE_BRANCH }}-${{ env.ANDROID_VERSION }}-clang-${{ env.CLANG_BRANCH }}-${{ env.CLANG_VERSION }}-kernel-${{ env.KERNEL_VERSION }}
+        key: ${{ runner.os }}-${{ env.CACHE_VERSION }}-${{ env.KERNEL_CONFIG }}-${{ env.KERNEL_SOURCE_BRANCH }}-USE_MTK_MODULES-${{ env.USE_MTK_KERNEL_MODULES }}-MTK_MODULES_BRANCH-${{ env.MTK_KERNEL_MODULES_SOURCE_BRANCH }}-${{ env.ANDROID_VERSION }}-clang-${{ env.CLANG_BRANCH }}-${{ env.CLANG_VERSION }}-kernel-${{ env.KERNEL_VERSION }}
         restore-keys: |
-            ${{ runner.os }}-${{ env.KERNEL_CONFIG }}-${{ env.KERNEL_SOURCE_BRANCH }}-USE_MTK_MODULES-${{ env.USE_MTK_KERNEL_MODULES }}-MTK_MODULES_BRANCH-${{ env.MTK_KERNEL_MODULES_SOURCE_BRANCH }}-${{ env.ANDROID_VERSION }}-clang-${{ env.CLANG_BRANCH }}-${{ env.CLANG_VERSION }}-kernel-${{ env.KERNEL_VERSION }}-
-            ${{ runner.os }}-${{ env.KERNEL_CONFIG }}-${{ env.KERNEL_SOURCE_BRANCH }}-USE_MTK_MODULES-${{ env.USE_MTK_KERNEL_MODULES }}-MTK_MODULES_BRANCH-${{ env.MTK_KERNEL_MODULES_SOURCE_BRANCH }}-${{ env.ANDROID_VERSION }}-clang-${{ env.CLANG_BRANCH }}-${{ env.CLANG_VERSION }}-
+            ${{ runner.os }}-${{ env.CACHE_VERSION }}-${{ env.KERNEL_CONFIG }}-${{ env.KERNEL_SOURCE_BRANCH }}-USE_MTK_MODULES-${{ env.USE_MTK_KERNEL_MODULES }}-MTK_MODULES_BRANCH-${{ env.MTK_KERNEL_MODULES_SOURCE_BRANCH }}-${{ env.ANDROID_VERSION }}-clang-${{ env.CLANG_BRANCH }}-${{ env.CLANG_VERSION }}-kernel-${{ env.KERNEL_VERSION }}-
+            ${{ runner.os }}-${{ env.CACHE_VERSION }}-${{ env.KERNEL_CONFIG }}-${{ env.KERNEL_SOURCE_BRANCH }}-USE_MTK_MODULES-${{ env.USE_MTK_KERNEL_MODULES }}-MTK_MODULES_BRANCH-${{ env.MTK_KERNEL_MODULES_SOURCE_BRANCH }}-${{ env.ANDROID_VERSION }}-clang-${{ env.CLANG_BRANCH }}-${{ env.CLANG_VERSION }}-
             
     - name: Download Clang-aosp(下载Clang-aosp编译器)
       if: env.USE_CUSTOM_CLANG != 'true'
@@ -654,6 +654,7 @@ jobs:
         fi
         
         if [ "${{ env.USE_MTK_KERNEL_MODULES }}" = "true" ]; then
+            ./scripts/config --disable CONFIG_MTK_VCU
             AS=clang
             CLANG_PATH=$GITHUB_WORKSPACE/kernel_workspace/clang-aosp
             export PATH=$GITHUB_WORKSPACE/kernel_workspace/clang-aosp/bin:$PATH
@@ -809,4 +810,4 @@ jobs:
           ${{ github.workspace }}/kernel_workspace/gcc-32
           ${{ github.workspace }}/kernel_workspace/tools
           ${{ github.workspace }}/kernel_workspace/boot-source.img
-        key: ${{ runner.os }}-${{ env.KERNEL_CONFIG }}-${{ env.KERNEL_SOURCE_BRANCH }}-USE_MTK_MODULES-${{ env.USE_MTK_KERNEL_MODULES }}-MTK_MODULES_BRANCH-${{ env.MTK_KERNEL_MODULES_SOURCE_BRANCH }}-${{ env.ANDROID_VERSION }}-clang-${{ env.CLANG_BRANCH }}-${{ env.CLANG_VERSION }}-kernel-${{ env.KERNEL_VERSION }}
+        key: ${{ runner.os }}-${{ env.CACHE_VERSION }}-${{ env.KERNEL_CONFIG }}-${{ env.KERNEL_SOURCE_BRANCH }}-USE_MTK_MODULES-${{ env.USE_MTK_KERNEL_MODULES }}-MTK_MODULES_BRANCH-${{ env.MTK_KERNEL_MODULES_SOURCE_BRANCH }}-${{ env.ANDROID_VERSION }}-clang-${{ env.CLANG_BRANCH }}-${{ env.CLANG_VERSION }}-kernel-${{ env.KERNEL_VERSION }}
