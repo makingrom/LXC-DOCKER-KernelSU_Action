@@ -694,6 +694,7 @@ jobs:
            echo "Kernel output file is empty"
            exit 1
        fi
+
        if [ "${{ env.NEED_DTBO }}" = "true" ]; then
            if [ -f android-kernel/out/arch/${{ env.ARCH }}/boot/dtbo.img ]; then
                echo "CHECK_DTBO_IS_OK=true" >> $GITHUB_ENV
@@ -703,6 +704,12 @@ jobs:
            fi
        fi
        
+    - name: 压缩 MTK 内核模块
+      if: env.CHECK_FILE_IS_OK == 'true' && env.USE_MTK_KERNEL_MODULES == 'true'
+      run: |
+        cd kernel_workspace/android-kernel/out
+        zip -r mtk_modules.zip out_modules/
+        
     - name: Make Anykernel3(制作Anykernel3卡刷包)
       if: env.CHECK_FILE_IS_OK == 'true' && env.USE_CUSTOM_ANYKERNEL3 != 'true'
       run: |
@@ -760,7 +767,7 @@ jobs:
       with:
         name: ${{ env.KERNEL_IMAGE_NAME }}${{ env.LOCALVERSION }}${{ env.UPLOADNAME }}-${{ env.DEVICE }}-${{ env.BUILD_TIME }}
         path: kernel_workspace/android-kernel/out/arch/${{ env.ARCH }}/boot/${{ env.KERNEL_IMAGE_NAME }}
-        
+            ${{ env.USE_MTK_KERNEL_MODULES == 'true' && 'kernel_workspace/android-kernel/out/mtk_modules.zip' || '' }}
     - name: Upload AnyKernel3(上传Upload AnyKernel3)
       if: env.CHECK_FILE_IS_OK == 'true'
       uses: actions/upload-artifact@v4
@@ -788,6 +795,7 @@ jobs:
       with:
         path: |
           ${{ github.workspace }}/kernel_workspace/android-kernel
+          ${{ github.workspace }}/kernel_workspace/${{ env.AARCH64-LINUX-ANDROID-BRANCH }}
           ${{ github.workspace }}/kernel_workspace/clang-aosp
           ${{ github.workspace }}/kernel_workspace/gcc-64
           ${{ github.workspace }}/kernel_workspace/gcc-32
