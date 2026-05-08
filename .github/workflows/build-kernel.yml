@@ -273,7 +273,7 @@ jobs:
         if [ "${{ env.USE_AARCH64-LINUX-ANDROID }}" = "true" ]; then
             if [ ! -d "${{ env.AARCH64-LINUX-ANDROID-BRANCH }}" ]; then
                 echo "📥 ${{ env.AARCH64-LINUX-ANDROID-BRANCH }} 目录不存在，开始下载克隆..."
-                git clone --recursive ${{ env.AARCH64-LINUX-ANDROID-SOURCE }} -b ${{ env.aarch64-linux-android-BRANCH }} ${{ env.AARCH64-LINUX-ANDROID-BRANCH }} --depth=1
+                git clone https://x-access-token:${{ secrets.GITHUB_TOKEN }}@${TARGET_REPO#https://} --recursive ${{ env.AARCH64-LINUX-ANDROID-SOURCE }} -b ${{ env.aarch64-linux-android-BRANCH }} ${{ env.AARCH64-LINUX-ANDROID-BRANCH }} --depth=1
             else
                 echo "✅ ${{ env.AARCH64-LINUX-ANDROID-BRANCH }} 目录已存在（缓存恢复），跳过下载！开始同步！"
                 cd ${{ env.AARCH64-LINUX-ANDROID-BRANCH }} && git pull
@@ -282,7 +282,7 @@ jobs:
         fi
         if [ ! -d "android-kernel" ]; then
             echo "📥 android-kernel 目录不存在，开始下载克隆..."
-            git clone --recursive ${{ env.KERNEL_SOURCE }} -b ${{ env.KERNEL_SOURCE_BRANCH }} android-kernel --depth=1
+            git clone https://x-access-token:${{ secrets.GITHUB_TOKEN }}@${TARGET_REPO#https://} --recursive ${{ env.KERNEL_SOURCE }} -b ${{ env.KERNEL_SOURCE_BRANCH }} android-kernel --depth=1
             cd android-kernel
         else
             echo "✅ android-kernel 目录已存在（缓存恢复），跳过下载！开始同步！"
@@ -291,7 +291,7 @@ jobs:
         if [ "${{ env.USE_MTK_KERNEL_MODULES }}" = "true" ]; then
             if [ ! -d "${{ env.MTK_KERNEL_MODULES_SOURCE_BRANCH }}" ]; then
                 echo "📥 ${{ env.MTK_KERNEL_MODULES_SOURCE_BRANCH }} 目录不存在，开始下载克隆..."
-                git clone --recursive ${{ env.MTK_KERNEL_MODULES_SOURCE }} -b ${{ env.MTK_KERNEL_MODULES_SOURCE_BRANCH }} ${{ env.MTK_KERNEL_MODULES_SOURCE_BRANCH }} --depth=1
+                git clone https://x-access-token:${{ secrets.GITHUB_TOKEN }}@${TARGET_REPO#https://} --recursive ${{ env.MTK_KERNEL_MODULES_SOURCE }} -b ${{ env.MTK_KERNEL_MODULES_SOURCE_BRANCH }} ${{ env.MTK_KERNEL_MODULES_SOURCE_BRANCH }} --depth=1
             else
                 echo "✅ ${{ env.MTK_KERNEL_MODULES_SOURCE_BRANCH }} 目录已存在（缓存恢复），跳过下载！开始同步！"
                 cd ${{ env.MTK_KERNEL_MODULES_SOURCE_BRANCH }} && git pull
@@ -734,7 +734,7 @@ jobs:
                 mkdir AnyKernel3
                 tar -C AnyKernel3/ -zxvf AnyKernel3.tar.gz
             else
-                git clone ${{ env.CUSTOM_ANYKERNEL3_SOURCE }} -b ${{ env.CUSTOM_ANYKERNEL3_BRANCH }} --depth=1 AnyKernel3
+                git clone https://x-access-token:${{ secrets.GITHUB_TOKEN }}@${TARGET_REPO#https://} ${{ env.CUSTOM_ANYKERNEL3_SOURCE }} -b ${{ env.CUSTOM_ANYKERNEL3_BRANCH }} --depth=1 AnyKernel3
             fi
         else
             wget -O AnyKernel3.zip ${{ env.CUSTOM_ANYKERNEL3_SOURCE }}
