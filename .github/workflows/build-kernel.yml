@@ -271,7 +271,7 @@ jobs:
       run: |
         cd $GITHUB_WORKSPACE/kernel_workspace
         if [ "${{ env.USE_AARCH64_LINUX_ANDROID }}" = "true" ]; then
-            if [ ! -d "${{ env.AARCH64_LINUX_ANDROID_BRANCH }}" ]; then
+            if [ ! -d ${{ env.AARCH64_LINUX_ANDROID_BRANCH }} ]; then
                 echo "📥 ${{ env.AARCH64_LINUX_ANDROID_BRANCH }} 目录不存在，开始下载克隆..."
                 git clone --recursive ${{ env.AARCH64_LINUX_ANDROID_SOURCE }} -b ${{ env.AARCH64_LINUX_ANDROID_BRANCH }} ${{ env.AARCH64_LINUX_ANDROID_BRANCH }} --depth=1
             else
@@ -289,7 +289,7 @@ jobs:
             cd android-kernel && git pull
         fi
         if [ "${{ env.USE_MTK_KERNEL_MODULES }}" = "true" ]; then
-            if [ ! -d "${{ env.MTK_KERNEL_MODULES_SOURCE_BRANCH }}" ]; then
+            if [ ! -d ${{ env.MTK_KERNEL_MODULES_SOURCE_BRANCH }} ]; then
                 echo "📥 ${{ env.MTK_KERNEL_MODULES_SOURCE_BRANCH }} 目录不存在，开始下载克隆..."
                 git clone --recursive ${{ env.MTK_KERNEL_MODULES_SOURCE }} -b ${{ env.MTK_KERNEL_MODULES_SOURCE_BRANCH }} ${{ env.MTK_KERNEL_MODULES_SOURCE_BRANCH }} --depth=1
             else
