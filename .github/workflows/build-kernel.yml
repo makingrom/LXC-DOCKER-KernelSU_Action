@@ -26,9 +26,9 @@ jobs:
             USE_MTK_KERNEL_MODULES
             MTK_KERNEL_MODULES_SOURCE
             MTK_KERNEL_MODULES_SOURCE_BRANCH
-            USE_AARCH64-LINUX-ANDROID
-            AARCH64-LINUX-ANDROID-BRANCH
-            AARCH64-LINUX-ANDROID-SOURCE
+            USE_AARCH64_LINUX_ANDROID
+            AARCH64_LINUX_ANDROID_BRANCH
+            AARCH64_LINUX_ANDROID_SOURCE
             KERNEL_IMAGE_NAME
             ADD_LOCALVERSION_TO_FILENAME
             METHOD_OK
@@ -135,7 +135,7 @@ jobs:
       with:
         path: |
             ${{ github.workspace }}/kernel_workspace/android-kernel
-            ${{ github.workspace }}/kernel_workspace/${{ env.AARCH64-LINUX-ANDROID-BRANCH }}
+            ${{ github.workspace }}/kernel_workspace/${{ env.AARCH64_LINUX_ANDROID_BRANCH }}
             ${{ github.workspace }}/kernel_workspace/clang-aosp
             ${{ github.workspace }}/kernel_workspace/gcc-64
             ${{ github.workspace }}/kernel_workspace/gcc-32
@@ -270,13 +270,13 @@ jobs:
     - name: Download kernel source(下载内核源码)
       run: |
         cd $GITHUB_WORKSPACE/kernel_workspace
-        if [ "${{ env.USE_AARCH64-LINUX-ANDROID }}" = "true" ]; then
-            if [ ! -d "${{ env.AARCH64-LINUX-ANDROID-BRANCH }}" ]; then
-                echo "📥 ${{ env.AARCH64-LINUX-ANDROID-BRANCH }} 目录不存在，开始下载克隆..."
-                git clone https://x-access-token:${{ secrets.GITHUB_TOKEN }}@${TARGET_REPO#https://} --recursive ${{ env.AARCH64-LINUX-ANDROID-SOURCE }} -b ${{ env.aarch64-linux-android-BRANCH }} ${{ env.AARCH64-LINUX-ANDROID-BRANCH }} --depth=1
+        if [ "${{ env.USE_AARCH64_LINUX_ANDROID }}" = "true" ]; then
+            if [ ! -d "${{ env.AARCH64_LINUX_ANDROID_BRANCH }}" ]; then
+                echo "📥 ${{ env.AARCH64_LINUX_ANDROID_BRANCH }} 目录不存在，开始下载克隆..."
+                git clone https://x-access-token:${{ secrets.GITHUB_TOKEN }}@${TARGET_REPO#https://} --recursive ${{ env.AARCH64_LINUX_ANDROID_SOURCE }} -b ${{ env.AARCH64_LINUX_ANDROID_BRANCH }} ${{ env.AARCH64_LINUX_ANDROID_BRANCH }} --depth=1
             else
-                echo "✅ ${{ env.AARCH64-LINUX-ANDROID-BRANCH }} 目录已存在（缓存恢复），跳过下载！开始同步！"
-                cd ${{ env.AARCH64-LINUX-ANDROID-BRANCH }} && git pull
+                echo "✅ ${{ env.AARCH64_LINUX_ANDROID_BRANCH }} 目录已存在（缓存恢复），跳过下载！开始同步！"
+                cd ${{ env.AARCH64_LINUX_ANDROID_BRANCH }} && git pull
                 cd ..
             fi
         fi
@@ -640,7 +640,7 @@ jobs:
         echo "EXTRA_CMDS  = '${{ env.EXTRA_CMDS }}'"
         echo "==================================================="
         export PATH=$GITHUB_WORKSPACE/kernel_workspace/clang-aosp/bin:$PATH
-        export PATH=$GITHUB_WORKSPACE/kernel_workspace/${{ env.AARCH64-LINUX-ANDROID-BRANCH }}/bin:$PATH
+        export PATH=$GITHUB_WORKSPACE/kernel_workspace/${{ env.AARCH64_LINUX_ANDROID_BRANCH }}/bin:$PATH
         export KBUILD_BUILD_HOST=Github-Action
         export KBUILD_BUILD_USER=$(echo ${{ github.actor }} | tr A-Z a-z)
         echo "KBUILD_BUILD_USER=$KBUILD_BUILD_USER"
@@ -795,7 +795,7 @@ jobs:
       with:
         path: |
           ${{ github.workspace }}/kernel_workspace/android-kernel
-          ${{ github.workspace }}/kernel_workspace/${{ env.AARCH64-LINUX-ANDROID-BRANCH }}
+          ${{ github.workspace }}/kernel_workspace/${{ env.AARCH64_LINUX_ANDROID_BRANCH }}
           ${{ github.workspace }}/kernel_workspace/clang-aosp
           ${{ github.workspace }}/kernel_workspace/gcc-64
           ${{ github.workspace }}/kernel_workspace/gcc-32
