@@ -653,6 +653,7 @@ jobs:
         fi
         
         if [ "${{ env.USE_MTK_KERNEL_MODULES }}" = "true" ]; then
+            AS=clang
             CLANG_PATH=$GITHUB_WORKSPACE/kernel_workspace/clang-aosp
             export PATH=$GITHUB_WORKSPACE/kernel_workspace/clang-aosp/bin:$PATH
             export LD_LIBRARY_PATH=$GITHUB_WORKSPACE/kernel_workspace/clang-aosp/lib64:$LD_LIBRARY_PATH
