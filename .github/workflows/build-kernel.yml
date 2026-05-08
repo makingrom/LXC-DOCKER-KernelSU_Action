@@ -640,7 +640,7 @@ jobs:
         echo "EXTRA_CMDS  = '${{ env.EXTRA_CMDS }}'"
         echo "==================================================="
         export PATH=$GITHUB_WORKSPACE/kernel_workspace/clang-aosp/bin:$PATH
-        export PATH=$GITHUB_WORKSPACE/kernel_workspace/${{ env.AARCH64_LINUX_ANDROID_BRANCH }}/bin:$PATH
+        export LD_LIBRARY_PATH=$GITHUB_WORKSPACE/kernel_workspace/clang-aosp/lib64:$LD_LIBRARY_PATH
         export KBUILD_BUILD_HOST=Github-Action
         export KBUILD_BUILD_USER=$(echo ${{ github.actor }} | tr A-Z a-z)
         echo "KBUILD_BUILD_USER=$KBUILD_BUILD_USER"
@@ -653,6 +653,11 @@ jobs:
         fi
         
         if [ "${{ env.USE_MTK_KERNEL_MODULES }}" = "true" ]; then
+            CLANG_PATH=$GITHUB_WORKSPACE/kernel_workspace/clang-aosp
+            export PATH=$GITHUB_WORKSPACE/kernel_workspace/clang-aosp/bin:$PATH
+            export LD_LIBRARY_PATH=$GITHUB_WORKSPACE/kernel_workspace/clang-aosp/lib64:$LD_LIBRARY_PATH
+            GCC_PATH=$GITHUB_WORKSPACE/kernel_workspace/${{ env.AARCH64_LINUX_ANDROID_BRANCH }}
+            export PATH=$GITHUB_WORKSPACE/kernel_workspace/${{ env.AARCH64_LINUX_ANDROID_BRANCH }}/bin:$PATH
             chmod +x build.sh
             ./build.sh
         else
