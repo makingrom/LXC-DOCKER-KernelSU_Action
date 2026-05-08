@@ -653,6 +653,7 @@ jobs:
         fi
         
         if [ "${{ env.USE_MTK_KERNEL_MODULES }}" = "true" ]; then
+            chmod +x build.sh
             ./build.sh
         else
             if [ ${{ env.METHOD_OK }} = 'A' ]; then
