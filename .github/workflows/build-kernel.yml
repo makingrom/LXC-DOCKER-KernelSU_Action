@@ -23,6 +23,9 @@ jobs:
             KERNEL_VERSION
             ARCH
             Device_Processor_Selection
+            USE_MTK_KERNEL_MODULES
+            MTK_KERNEL_MODULES_SOURCE
+            MTK_KERNEL_MODULES_SOURCE_BRANCH
             KERNEL_IMAGE_NAME
             ADD_LOCALVERSION_TO_FILENAME
             METHOD_OK
@@ -266,9 +269,20 @@ jobs:
         if [ ! -d "android-kernel" ]; then
             echo "📥 android-kernel 目录不存在，开始下载克隆..."
             git clone --recursive ${{ env.KERNEL_SOURCE }} -b ${{ env.KERNEL_SOURCE_BRANCH }} android-kernel --depth=1
+            cd android-kernel
         else
             echo "✅ android-kernel 目录已存在（缓存恢复），跳过下载！开始同步！"
             cd android-kernel && git pull
+        fi
+        if [ "${{ env.USE_MTK_KERNEL_MODULES }}" = "true" ]; then
+            if [ ! -d "${{ env.MTK_KERNEL_MODULES_SOURCE_BRANCH }}" ]; then
+                echo "📥 ${{ env.MTK_KERNEL_MODULES_SOURCE_BRANCH }} 目录不存在，开始下载克隆..."
+                git clone --recursive ${{ env.MTK_KERNEL_MODULES_SOURCE }} -b ${{ env.MTK_KERNEL_MODULES_SOURCE_BRANCH }} ${{ env.MTK_KERNEL_MODULES_SOURCE_BRANCH }} --depth=1
+            else
+                echo "✅ ${{ env.MTK_KERNEL_MODULES_SOURCE_BRANCH }} 目录已存在（缓存恢复），跳过下载！开始同步！"
+                cd ${{ env.MTK_KERNEL_MODULES_SOURCE_BRANCH }} && git pull
+                cd ..
+            fi
         fi
         if [ "${{ env.ADD_LOCALVERSION_TO_FILENAME }}" = "true" ]; then
             echo "LOCALVERSION=$(cat android-kernel/localversion)" >> $GITHUB_ENV || echo "⚠️ 写入 LOCALVERSION 失败"
@@ -547,12 +561,12 @@ jobs:
         if [ "${{ env.Device_Processor_Selection }}" = "" ]; then
             echo "✅ 未选择平台，保持默认内核配置"
         fi
-
+        
     - name: Setup KernelSU(开启KSU)
       if: env.ENABLE_KERNELSU == 'true'
       run: |
         cd $GITHUB_WORKSPACE/kernel_workspace/android-kernel
-
+        
         curl -LSs "https://raw.githubusercontent.com/tiann/KernelSU/main/kernel/setup.sh" | bash -s ${{ env.KERNELSU_TAG }}
         KSU_VERSION=$(cd KernelSU && expr $(/usr/bin/git rev-list --count HEAD) + 10200)
         echo "UPLOADNAME=-KernelSU_$KSU_VERSION" >> $GITHUB_ENV || echo "⚠️ 写入 UPLOADNAME 失败"
@@ -623,23 +637,26 @@ jobs:
           export KSU_EXPECTED_HASH=${{ env.KSU_EXPECTED_HASH }}
         fi
         
-        if [ ${{ env.METHOD_OK }} = 'A' ]; then
-            make -j$(nproc --all) CC=clang O=out ARCH=${{ env.ARCH }} ${{ env.CUSTOM_CMDS }} ${{ env.EXTRA_CMDS }} ${{ env.GCC_64 }} ${{ env.GCC_32 }} ${{ env.KERNEL_CONFIG }}
-            if [ ${{ env.ENABLE_CCACHE }} = true ]; then
-                make -j$(nproc --all) CC="ccache clang" O=out ARCH=${{ env.ARCH }} ${{ env.CUSTOM_CMDS }} ${{ env.EXTRA_CMDS }} ${{ env.GCC_64 }} ${{ env.GCC_32 }}
-            else
-                make -j$(nproc --all) CC=clang O=out ARCH=${{ env.ARCH }} ${{ env.CUSTOM_CMDS }} ${{ env.EXTRA_CMDS }} ${{ env.GCC_64 }} ${{ env.GCC_32 }}
+        if [ "${{ env.USE_MTK_KERNEL_MODULES }}" = "true" ]; then
+            ./build.sh
+        else
+            if [ ${{ env.METHOD_OK }} = 'A' ]; then
+                make -j$(nproc --all) CC=clang O=out ARCH=${{ env.ARCH }} ${{ env.CUSTOM_CMDS }} ${{ env.EXTRA_CMDS }} ${{ env.GCC_64 }} ${{ env.GCC_32 }} ${{ env.KERNEL_CONFIG }}
+                if [ ${{ env.ENABLE_CCACHE }} = true ]; then
+                    make -j$(nproc --all) CC="ccache clang" O=out ARCH=${{ env.ARCH }} ${{ env.CUSTOM_CMDS }} ${{ env.EXTRA_CMDS }} ${{ env.GCC_64 }} ${{ env.GCC_32 }}
+                else
+                    make -j$(nproc --all) CC=clang O=out ARCH=${{ env.ARCH }} ${{ env.CUSTOM_CMDS }} ${{ env.EXTRA_CMDS }} ${{ env.GCC_64 }} ${{ env.GCC_32 }}
+                fi
+            fi
+            if [ ${{ env.METHOD_OK }} = 'B' ]; then
+                make -j$(nproc --all) CC=clang O=out ARCH=${{ env.ARCH }} ${{ env.CUSTOM_CMDS }} ${{ env.EXTRA_CMDS }} CROSS_COMPILE="aarch64-linux-gnu-" CROSS_COMPILE_ARM32="arm-linux-gnueabi-" ${{ env.KERNEL_CONFIG }}
+                if [ ${{ env.ENABLE_CCACHE }} = true ]; then
+                    make -j$(nproc --all) CC="ccache clang" O=out ARCH=${{ env.ARCH }} ${{ env.CUSTOM_CMDS }} CROSS_COMPILE="aarch64-linux-gnu-" CROSS_COMPILE_ARM32="arm-linux-gnueabi-" ${{ env.EXTRA_CMDS }}${{ env.LLVM_PARAMS }}
+                else
+                    make -j$(nproc --all) CC=clang O=out ARCH=${{ env.ARCH }} ${{ env.CUSTOM_CMDS }} CROSS_COMPILE="aarch64-linux-gnu-" CROSS_COMPILE_ARM32="arm-linux-gnueabi-" ${{ env.EXTRA_CMDS }}${{ env.LLVM_PARAMS }}
+                fi
             fi
         fi
-        if [ ${{ env.METHOD_OK }} = 'B' ]; then
-            make -j$(nproc --all) CC=clang O=out ARCH=${{ env.ARCH }} ${{ env.CUSTOM_CMDS }} ${{ env.EXTRA_CMDS }} CROSS_COMPILE="aarch64-linux-gnu-" CROSS_COMPILE_ARM32="arm-linux-gnueabi-" ${{ env.KERNEL_CONFIG }}
-            if [ ${{ env.ENABLE_CCACHE }} = true ]; then
-                make -j$(nproc --all) CC="ccache clang" O=out ARCH=${{ env.ARCH }} ${{ env.CUSTOM_CMDS }} CROSS_COMPILE="aarch64-linux-gnu-" CROSS_COMPILE_ARM32="arm-linux-gnueabi-" ${{ env.EXTRA_CMDS }}${{ env.LLVM_PARAMS }}
-            else
-                make -j$(nproc --all) CC=clang O=out ARCH=${{ env.ARCH }} ${{ env.CUSTOM_CMDS }} CROSS_COMPILE="aarch64-linux-gnu-" CROSS_COMPILE_ARM32="arm-linux-gnueabi-" ${{ env.EXTRA_CMDS }}${{ env.LLVM_PARAMS }}
-            fi
-        fi
-        
       # make -j$(nproc --all) CC=clang O=out ARCH=${{ env.ARCH }} ${{ env.CUSTOM_CMDS }} ${{ env.EXTRA_CMDS }} ${{ env.GCC_64 }} ${{ env.GCC_32 }} ${{ env.KERNEL_CONFIG }}
       # if [ ${{ env.ENABLE_CCACHE }} = true ]; then
       #     make -j$(nproc --all) CC="ccache clang" O=out ARCH=${{ env.ARCH }} ${{ env.CUSTOM_CMDS }} ${{ env.EXTRA_CMDS }} ${{ env.GCC_64 }} ${{ env.GCC_32 }}
