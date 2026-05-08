@@ -21,6 +21,7 @@ jobs:
             KERNEL_CONFIG
             ANDROID_VERSION
             KERNEL_VERSION
+            CACHE_VERSION
             ARCH
             Device_Processor_Selection
             USE_MTK_KERNEL_MODULES
