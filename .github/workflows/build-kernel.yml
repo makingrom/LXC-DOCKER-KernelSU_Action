@@ -26,6 +26,9 @@ jobs:
             USE_MTK_KERNEL_MODULES
             MTK_KERNEL_MODULES_SOURCE
             MTK_KERNEL_MODULES_SOURCE_BRANCH
+            USE_AARCH64-LINUX-ANDROID
+            AARCH64-LINUX-ANDROID-BRANCH
+            AARCH64-LINUX-ANDROID-SOURCE
             KERNEL_IMAGE_NAME
             ADD_LOCALVERSION_TO_FILENAME
             METHOD_OK
@@ -132,15 +135,16 @@ jobs:
       with:
         path: |
             ${{ github.workspace }}/kernel_workspace/android-kernel
+            ${{ github.workspace }}/kernel_workspace/${{ env.AARCH64-LINUX-ANDROID-BRANCH }}
             ${{ github.workspace }}/kernel_workspace/clang-aosp
             ${{ github.workspace }}/kernel_workspace/gcc-64
             ${{ github.workspace }}/kernel_workspace/gcc-32
             ${{ github.workspace }}/kernel_workspace/tools
             ${{ github.workspace }}/kernel_workspace/boot-source.img
-        key: ${{ runner.os }}-${{ env.KERNEL_CONFIG }}-${{ env.KERNEL_SOURCE_BRANCH }}-${{ env.ANDROID_VERSION }}-clang-${{ env.CLANG_BRANCH }}-${{ env.CLANG_VERSION }}-kernel-${{ env.KERNEL_VERSION }}
+        key: ${{ runner.os }}-${{ env.KERNEL_CONFIG }}-${{ env.KERNEL_SOURCE_BRANCH }}-USE_MTK_MODULES-${{ env.USE_MTK_KERNEL_MODULES }}-MTK_MODULES_BRANCH-${{ env.MTK_KERNEL_MODULES_SOURCE_BRANCH }}-${{ env.ANDROID_VERSION }}-clang-${{ env.CLANG_BRANCH }}-${{ env.CLANG_VERSION }}-kernel-${{ env.KERNEL_VERSION }}
         restore-keys: |
-            ${{ runner.os }}-${{ env.KERNEL_CONFIG }}-${{ env.KERNEL_SOURCE_BRANCH }}-${{ env.ANDROID_VERSION }}-clang-${{ env.CLANG_BRANCH }}-${{ env.CLANG_VERSION }}-kernel-${{ env.KERNEL_VERSION }}-
-            ${{ runner.os }}-${{ env.KERNEL_CONFIG }}-${{ env.KERNEL_SOURCE_BRANCH }}-${{ env.ANDROID_VERSION }}-clang-${{ env.CLANG_BRANCH }}-${{ env.CLANG_VERSION }}-
+            ${{ runner.os }}-${{ env.KERNEL_CONFIG }}-${{ env.KERNEL_SOURCE_BRANCH }}-USE_MTK_MODULES-${{ env.USE_MTK_KERNEL_MODULES }}-MTK_MODULES_BRANCH-${{ env.MTK_KERNEL_MODULES_SOURCE_BRANCH }}-${{ env.ANDROID_VERSION }}-clang-${{ env.CLANG_BRANCH }}-${{ env.CLANG_VERSION }}-kernel-${{ env.KERNEL_VERSION }}-
+            ${{ runner.os }}-${{ env.KERNEL_CONFIG }}-${{ env.KERNEL_SOURCE_BRANCH }}-USE_MTK_MODULES-${{ env.USE_MTK_KERNEL_MODULES }}-MTK_MODULES_BRANCH-${{ env.MTK_KERNEL_MODULES_SOURCE_BRANCH }}-${{ env.ANDROID_VERSION }}-clang-${{ env.CLANG_BRANCH }}-${{ env.CLANG_VERSION }}-
             
     - name: Download Clang-aosp(下载Clang-aosp编译器)
       if: env.USE_CUSTOM_CLANG != 'true'
@@ -266,6 +270,16 @@ jobs:
     - name: Download kernel source(下载内核源码)
       run: |
         cd $GITHUB_WORKSPACE/kernel_workspace
+        if [ "${{ env.USE_AARCH64-LINUX-ANDROID }}" = "true" ]; then
+            if [ ! -d "${{ env.AARCH64-LINUX-ANDROID-BRANCH }}" ]; then
+                echo "📥 ${{ env.AARCH64-LINUX-ANDROID-BRANCH }} 目录不存在，开始下载克隆..."
+                git clone --recursive ${{ env.AARCH64-LINUX-ANDROID-SOURCE }} -b ${{ env.aarch64-linux-android-BRANCH }} ${{ env.AARCH64-LINUX-ANDROID-BRANCH }} --depth=1
+            else
+                echo "✅ ${{ env.AARCH64-LINUX-ANDROID-BRANCH }} 目录已存在（缓存恢复），跳过下载！开始同步！"
+                cd ${{ env.AARCH64-LINUX-ANDROID-BRANCH }} && git pull
+                cd ..
+            fi
+        fi
         if [ ! -d "android-kernel" ]; then
             echo "📥 android-kernel 目录不存在，开始下载克隆..."
             git clone --recursive ${{ env.KERNEL_SOURCE }} -b ${{ env.KERNEL_SOURCE_BRANCH }} android-kernel --depth=1
@@ -285,7 +299,7 @@ jobs:
             fi
         fi
         if [ "${{ env.ADD_LOCALVERSION_TO_FILENAME }}" = "true" ]; then
-            echo "LOCALVERSION=$(cat android-kernel/localversion)" >> $GITHUB_ENV || echo "⚠️ 写入 LOCALVERSION 失败"
+            echo "LOCALVERSION=$(cat localversion)" >> $GITHUB_ENV || echo "⚠️ 写入 LOCALVERSION 失败"
         else
             echo "LOCALVERSION=" >> $GITHUB_ENV || echo "⚠️ 写入 LOCALVERSION 失败"
         fi
@@ -626,6 +640,7 @@ jobs:
         echo "EXTRA_CMDS  = '${{ env.EXTRA_CMDS }}'"
         echo "==================================================="
         export PATH=$GITHUB_WORKSPACE/kernel_workspace/clang-aosp/bin:$PATH
+        export PATH=$GITHUB_WORKSPACE/kernel_workspace/${{ env.AARCH64-LINUX-ANDROID-BRANCH }}/bin:$PATH
         export KBUILD_BUILD_HOST=Github-Action
         export KBUILD_BUILD_USER=$(echo ${{ github.actor }} | tr A-Z a-z)
         echo "KBUILD_BUILD_USER=$KBUILD_BUILD_USER"
@@ -778,4 +793,4 @@ jobs:
           ${{ github.workspace }}/kernel_workspace/gcc-32
           ${{ github.workspace }}/kernel_workspace/tools
           ${{ github.workspace }}/kernel_workspace/boot-source.img
-        key: ${{ runner.os }}-${{ env.KERNEL_CONFIG }}-${{ env.KERNEL_SOURCE_BRANCH }}-${{ env.ANDROID_VERSION }}-clang-${{ env.CLANG_BRANCH }}-${{ env.CLANG_VERSION }}-kernel-${{ env.KERNEL_VERSION }}
+        key: ${{ runner.os }}-${{ env.KERNEL_CONFIG }}-${{ env.KERNEL_SOURCE_BRANCH }}-USE_MTK_MODULES-${{ env.USE_MTK_KERNEL_MODULES }}-MTK_MODULES_BRANCH-${{ env.MTK_KERNEL_MODULES_SOURCE_BRANCH }}-${{ env.ANDROID_VERSION }}-clang-${{ env.CLANG_BRANCH }}-${{ env.CLANG_VERSION }}-kernel-${{ env.KERNEL_VERSION }}
